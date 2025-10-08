@@ -1,19 +1,15 @@
-import { Stack } from "expo-router";
+import { useFonts } from "expo-font";
+import { Slot } from "expo-router";
 import "../global.css";
 
 const RootLayout = () => {
-  return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <Stack.Screen name="index" />
-      <Stack.Screen name="create_battle" />
-      <Stack.Screen name="join_battle" />
-      <Stack.Screen name="battle" />
-    </Stack>
-  );
+  const [fontsLoaded] = useFonts({
+    JetBrainsMono: require("../assets/fonts/JetBrainsMono-VariableFont_wght.ttf"),
+    "JetBrainsMono-bold": require("../assets/fonts/JetBrainsMono-Bold.ttf"),
+  });
+
+  if (!fontsLoaded) return null; // o un splash screen
+  return <Slot />;
 };
 
 export default RootLayout;
