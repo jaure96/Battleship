@@ -1,5 +1,6 @@
 import { useFonts } from "expo-font";
 import { Slot } from "expo-router";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 import "../global.css";
 
 const RootLayout = () => {
@@ -8,8 +9,12 @@ const RootLayout = () => {
     "JetBrainsMono-bold": require("../assets/fonts/JetBrainsMono-Bold.ttf"),
   });
 
-  if (!fontsLoaded) return null; // o un splash screen
-  return <Slot />;
+  if (!fontsLoaded) return null;
+  return (
+    <KeyboardProvider>
+      <Slot />
+    </KeyboardProvider>
+  );
 };
 
 export default RootLayout;
