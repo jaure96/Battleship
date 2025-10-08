@@ -51,24 +51,16 @@ module.exports = {
         explosion: "#ff5526", // hsl(15, 100%, 50%)
         "hit-marker": "#e64545", // hsl(0, 75%, 55%)
         "miss-marker": "#99bbd9", // hsl(200, 30%, 70%)
-
-        /* Sidebar (extra UI) */
-        "sidebar-background": "#fafafa", // hsl(0, 0%, 98%)
-        "sidebar-foreground": "#3f3f46", // hsl(240, 5.3%, 26.1%)
-        "sidebar-primary": "#1a1a1a", // hsl(240, 5.9%, 10%)
-        "sidebar-primary-foreground": "#fafafa",
-        "sidebar-accent": "#f4f4f5", // hsl(240, 4.8%, 95.9%)
-        "sidebar-accent-foreground": "#1a1a1a",
-        "sidebar-border": "#e5e7eb", // hsl(220, 13%, 91%)
-        "sidebar-ring": "#3b82f6", // hsl(217.2, 91.2%, 59.8%)
       },
       fontFamily: {
-        mono: ["Courier New"],
+        mono: ["JetBrainsMono"],
+        "mono-bold": ["JetBrainsMono-bold"],
       },
       borderRadius: {
         lg: 20,
         md: 10,
         sm: 5,
+        s: 2,
       },
       keyframes: {
         "pixel-bounce": {
