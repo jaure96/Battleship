@@ -119,7 +119,10 @@ export const useMatch = (matchId: string | null) => {
     }) as unknown as Promise<{ data: Match | null; error: any }>;
   };
 
-  const joinMatchByCode = async (code: string, display_name?: string) => {
+  const joinMatchByCode = async (
+    code: string,
+    display_name?: string
+  ): Promise<{ data: Match | null; error: any }> => {
     if (!supabase || !playerId) throw new Error("No supabase or playerId");
     return supabase.rpc("rpc_join_match_by_code", {
       p_code: code,
