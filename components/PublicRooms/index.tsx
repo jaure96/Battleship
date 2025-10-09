@@ -16,14 +16,14 @@ const PublicRooms = ({ containerClass }: Props) => {
     >
       <View className="flex-row gap-1">
         <Fontisto name="world-o" color="#ffcc33" size={22} />
-        <Text className="font-mono text-xl color-white">Public rooms</Text>
+        <Text className="font-mono text-xl color-white">Public battles</Text>
       </View>
       <TextInput
         value={roomName}
         className="bg-slate-400/30 color-white/50 rounded-sm font-mono"
         maxLength={30}
         onChangeText={(val) => setRoomName(val)}
-        placeholder="Search room..."
+        placeholder="Search for battles..."
       />
       <FlatList
         data={[

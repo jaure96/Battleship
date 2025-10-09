@@ -1,3 +1,4 @@
+import useJoinBattle from "@/hooks/useJoinBattle";
 import { Room } from "@/types/room";
 import { Fontisto, MaterialIcons } from "@expo/vector-icons";
 import React from "react";
@@ -8,6 +9,8 @@ type Props = {
 };
 
 const RoomListItem = ({ room }: Props) => {
+  const { handleJoinBattle } = useJoinBattle();
+
   return (
     <View className="flex-row h-15 border-2 border-border justify-between items-center py-2 my-1 px-2">
       <View className="flex-col gap-1">
@@ -25,7 +28,11 @@ const RoomListItem = ({ room }: Props) => {
         </View>
       </View>
 
-      <TouchableOpacity className="bg-transparent  py-2 px-4 border-background border-[1px] rounded-s  justify-center items-center">
+      <TouchableOpacity
+        activeOpacity={0.8}
+        className="bg-transparent  py-2 px-4 border-background border-[1px] rounded-s  justify-center items-center"
+        onPress={() => handleJoinBattle("public")}
+      >
         <Text className="font-mono text-background">Join </Text>
       </TouchableOpacity>
     </View>

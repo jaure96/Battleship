@@ -1,5 +1,6 @@
 import GameHeader from "@/components/GameHeader";
 import PublicRooms from "@/components/PublicRooms";
+import useJoinBattle from "@/hooks/useJoinBattle";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
 import { useState } from "react";
@@ -10,8 +11,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 const JoinBattle = () => {
   const { goBack } = useNavigation();
   const { top } = useSafeAreaInsets();
-
   const [roomCode, setRoomCode] = useState("");
+
+  const { handleJoinBattle } = useJoinBattle();
 
   return (
     <KeyboardAvoidingView
@@ -39,7 +41,9 @@ const JoinBattle = () => {
           <View className="flex-col ">
             <View className="flex-row content-center items-center gap-1">
               <Ionicons name="search" color="#ffcc33" size={24} />
-              <Text className="font-mono text-xl color-white">Search room</Text>
+              <Text className="font-mono text-xl color-white">
+                Search battle
+              </Text>
             </View>
             <Text className="font-mono text-md color-white mt-3">
               Enter room code:
@@ -59,6 +63,7 @@ const JoinBattle = () => {
             <TouchableOpacity
               className="bg-background h-10 rounded-s my-6 justify-center"
               activeOpacity={0.8}
+              onPress={() => handleJoinBattle("private")}
             >
               <Text className="text-center font-mono-bold text-xl">JOIN</Text>
             </TouchableOpacity>
