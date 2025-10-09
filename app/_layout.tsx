@@ -1,3 +1,4 @@
+import { GameProvider } from "@/context/GameContext";
 import { useFonts } from "expo-font";
 import { Slot } from "expo-router";
 import { KeyboardProvider } from "react-native-keyboard-controller";
@@ -12,7 +13,9 @@ const RootLayout = () => {
   if (!fontsLoaded) return null;
   return (
     <KeyboardProvider>
-      <Slot />
+      <GameProvider>
+        <Slot />
+      </GameProvider>
     </KeyboardProvider>
   );
 };
