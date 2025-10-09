@@ -4,7 +4,7 @@ import { useMatch } from "@/hooks/useMatch";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
 import { useCallback, useState } from "react";
-import { Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -13,7 +13,7 @@ const CreateBattle = () => {
   const { top } = useSafeAreaInsets();
 
   const [battleName, setBattleName] = useState("");
-  const [isPublic, setIsPublic] = useState(true);
+  const [isPublic, setIsPublic] = useState(false);
 
   const { setMatch } = useGame();
   const { createMatch } = useMatch(null);
@@ -70,7 +70,7 @@ const CreateBattle = () => {
           </View>
 
           {/*Public or private room */}
-          <View className="flex-row items-center justify-between p-4 my-3 border-2 border-border bg-muted/20">
+          {/* <View className="flex-row items-center justify-between p-4 my-3 border-2 border-border bg-muted/20">
             <View className="flex-row gap-2">
               <View className="flex-row justify-center align-middle items-center  gap-2">
                 {isPublic ? (
@@ -96,7 +96,7 @@ const CreateBattle = () => {
                 value={isPublic}
               />
             </View>
-          </View>
+          </View>*/}
 
           {/*Button*/}
           <TouchableOpacity

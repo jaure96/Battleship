@@ -1,19 +1,39 @@
 import GameHeader from "@/components/GameHeader";
-import PublicRooms from "@/components/PublicRooms";
-import useJoinBattle from "@/hooks/useJoinBattle";
-import { Ionicons } from "@expo/vector-icons";
+import Toast from "@/components/Toast";
+import { useGame } from "@/context/GameContext";
+import { useMatch } from "@/hooks/useMatch";
+import { useToast } from "@/hooks/useToast";
+import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const JoinBattle = () => {
-  const { goBack } = useNavigation();
+  const { goBack, navigate } = useNavigation();
   const { top } = useSafeAreaInsets();
   const [roomCode, setRoomCode] = useState("");
 
-  const { handleJoinBattle } = useJoinBattle();
+  const { setMatch } = useGame();
+  const { joinMatchByCode } = useMatch(null);
+  const { toast, setToast, error: errorFn } = useToast();
+
+  const handleJoinBattle = useCallback(async () => {
+    try {
+      if (roomCode.length !== 6) return;
+      const { data, error } = await joinMatchByCode(roomCode);
+      if (error) errorFn(error.message, 3_000);
+
+      if (!error && data) {
+        setMatch(data);
+        //@ts-ignore
+        navigate("battle");
+      }
+    } catch (e) {
+      errorFn("Error joining battle. Try again.", 3_000);
+    }
+  }, [joinMatchByCode, roomCode]);
 
   return (
     <KeyboardAvoidingView
@@ -21,6 +41,7 @@ const JoinBattle = () => {
       keyboardVerticalOffset={0}
       style={{ flex: 1 }}
     >
+      <Toast toast={toast} onHide={() => setToast(null)} />
       <View className="flex-1 justify-center items-center bg-background px-6">
         {/* Go back button*/}
         <TouchableOpacity
@@ -38,39 +59,46 @@ const JoinBattle = () => {
         />
 
         <View className="w-full mt-10 px-10 pt-5 bg-black/80 rounded-xl">
+          <View className="flex justify-center items-center  ">
+            <FontAwesome6 name="bomb" color="#ffcc33" size={55} />
+          </View>
           <View className="flex-col ">
-            <View className="flex-row content-center items-center gap-1">
-              <Ionicons name="search" color="#ffcc33" size={24} />
-              <Text className="font-mono text-xl color-white">
-                Search battle
-              </Text>
-            </View>
+            {/*
+              <View className="flex-row content-center items-center gap-1">
+                <Ionicons name="search" color="#ffcc33" size={24} />
+                <Text className="font-mono text-xl color-white">
+                  Search battle
+                </Text>
+              </View>
+            */}
             <Text className="font-mono text-md color-white mt-3">
-              Enter room code:
+              Enter battle code:
             </Text>
 
             <TextInput
               value={roomCode}
               className="bg-slate-400/30 color-white/50 rounded-sm font-mono"
-              maxLength={7}
+              maxLength={6}
               onChangeText={(val) => setRoomCode(val)}
-              placeholder="example: d6h38H"
+              placeholder="example: F3GS45"
             />
             <Text className="font-mono text-xs color-white/35">
-              {roomCode.length}/7 characters
+              {roomCode.length}/6 characters
             </Text>
 
             <TouchableOpacity
               className="bg-background h-10 rounded-s my-6 justify-center"
               activeOpacity={0.8}
-              onPress={() => handleJoinBattle("private")}
+              disabled={roomCode.length !== 6}
+              style={{ opacity: roomCode.length !== 6 ? 0.3 : 1 }}
+              onPress={handleJoinBattle}
             >
               <Text className="text-center font-mono-bold text-xl">JOIN</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        <PublicRooms containerClass="mt-10 px-10" />
+        {/*<PublicRooms containerClass="mt-10 px-10" />*/}
       </View>
     </KeyboardAvoidingView>
   );
