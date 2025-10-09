@@ -36,7 +36,7 @@ const CreateBattle = () => {
         </View>
 
         <GameHeader
-          title="Create room"
+          title="Create battle"
           subtitle="Configure you battle"
           showDivider
         />
@@ -46,7 +46,7 @@ const CreateBattle = () => {
             <MaterialCommunityIcons name="crown" color="#ffcc33" size={55} />
           </View>
           <View className="flex-col mt-5">
-            <Text className="font-mono text-md color-white">Room name:</Text>
+            <Text className="font-mono text-md color-white">Battle name:</Text>
             <TextInput
               value={roomName}
               className="bg-slate-400/30 color-white/50 rounded-sm font-mono"
@@ -70,7 +70,7 @@ const CreateBattle = () => {
               </View>
               <View className="flex-col justify-items-center align-middle">
                 <Text className="text-sm font-mono font-bold text-foreground">
-                  Public room
+                  Public battle
                 </Text>
                 <Text className="text-xs text-muted-foreground font-mono">
                   {isPublic ? "Other players can find it" : "Code access only"}
