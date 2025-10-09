@@ -1,0 +1,159 @@
+import { Match } from "@/types/match";
+import { useEffect, useRef, useState } from "react";
+import { useGame } from "../context/GameContext";
+
+export const useMatch = (matchId: string | null) => {
+  const { supabase, playerId, setMatch } = useGame();
+  const [players, setPlayers] = useState<any[]>([]);
+  const [moves, setMoves] = useState<any[]>([]);
+  const channelRefs = useRef<{ match?: any; players?: any; moves?: any }>({});
+
+  useEffect(() => {
+    if (!matchId || !supabase) return;
+    let mounted = true;
+
+    (async () => {
+      const { data: m } = await supabase
+        .from("matches")
+        .select("*")
+        .eq("id", matchId)
+        .single();
+      if (mounted) setMatch(m);
+
+      const { data: pls } = await supabase
+        .from("match_players")
+        .select("*")
+        .eq("match_id", matchId);
+      if (mounted) setPlayers(pls ?? []);
+
+      const { data: ms } = await supabase
+        .from("moves")
+        .select("*")
+        .eq("match_id", matchId)
+        .order("move_number", { ascending: true });
+      if (mounted) setMoves(ms ?? []);
+    })();
+
+    // suscripciones
+    const matchChannel = supabase
+      .channel(`public:matches:id=eq.${matchId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "matches",
+          filter: `id=eq.${matchId}`,
+        },
+        (payload) => {
+          setMatch(payload.new ?? payload.old);
+        }
+      )
+      .subscribe();
+
+    const playersChannel = supabase
+      .channel(`public:match_players:match_id=eq.${matchId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "match_players",
+          filter: `match_id=eq.${matchId}`,
+        },
+        async () => {
+          const { data: pls } = await supabase
+            .from("match_players")
+            .select("*")
+            .eq("match_id", matchId);
+          setPlayers(pls ?? []);
+        }
+      )
+      .subscribe();
+
+    const movesChannel = supabase
+      .channel(`public:moves:match_id=eq.${matchId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "moves",
+          filter: `match_id=eq.${matchId}`,
+        },
+        (payload) => {
+          setMoves((prev) => [...prev, payload.new]);
+        }
+      )
+      .subscribe();
+
+    channelRefs.current = {
+      match: matchChannel,
+      players: playersChannel,
+      moves: movesChannel,
+    };
+
+    return () => {
+      mounted = false;
+      if (channelRefs.current.match)
+        supabase.removeChannel(channelRefs.current.match);
+      if (channelRefs.current.players)
+        supabase.removeChannel(channelRefs.current.players);
+      if (channelRefs.current.moves)
+        supabase.removeChannel(channelRefs.current.moves);
+    };
+  }, [matchId, supabase]);
+
+  // RPCs
+  const createMatch = async (
+    name: string,
+    isPrivate = false,
+    displayName?: string
+  ): Promise<{ data: Match | null; error: any }> => {
+    if (!supabase || !playerId) throw new Error("No supabase or playerId");
+    return supabase.rpc("rpc_create_match", {
+      p_name: name,
+      p_is_private: isPrivate,
+      p_host_player_id: playerId,
+      p_display_name: displayName ?? null,
+    }) as unknown as Promise<{ data: Match | null; error: any }>;
+  };
+
+  const joinMatchByCode = async (code: string, display_name?: string) => {
+    if (!supabase || !playerId) throw new Error("No supabase or playerId");
+    return supabase.rpc("rpc_join_match_by_code", {
+      p_code: code,
+      p_player_id: playerId,
+      p_display_name: display_name ?? null,
+    });
+  };
+
+  const setShipsAndReady = async (shipsJson: any, ready: boolean) => {
+    if (!supabase || !playerId || !matchId) throw new Error("missing");
+    return supabase.rpc("rpc_set_ships_and_ready", {
+      p_match_id: matchId,
+      p_player_id: playerId,
+      p_ships: shipsJson,
+      p_ready: ready,
+    });
+  };
+
+  const makeMove = async (x: number, y: number) => {
+    if (!supabase || !playerId || !matchId) throw new Error("missing");
+    return supabase.rpc("rpc_make_move", {
+      p_match_id: matchId,
+      p_by_player_id: playerId,
+      p_x: x,
+      p_y: y,
+    });
+  };
+
+  return {
+    players,
+    moves,
+    createMatch,
+    joinMatchByCode,
+    setShipsAndReady,
+    makeMove,
+  };
+};

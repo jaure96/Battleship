@@ -1,4 +1,6 @@
 import GameBoardHeader from "@/components/GameBoardHeader";
+import { useGame } from "@/context/GameContext";
+import { useMatch } from "@/hooks/useMatch";
 import { ScrollView, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -7,7 +9,11 @@ const cells = Array.from({ length: gridSize * gridSize });
 
 const Battle = () => {
   const { top, bottom } = useSafeAreaInsets();
+  const { match } = useGame();
 
+  const {} = useMatch(match?.id ?? null);
+
+  if (match === null) return null;
   return (
     <ScrollView>
       <View
@@ -15,7 +21,7 @@ const Battle = () => {
         style={{ paddingTop: top, paddingBottom: bottom }}
       >
         {/* Header de la batalla */}
-        <GameBoardHeader />
+        <GameBoardHeader match={match} />
 
         {/* Tablero del jugador */}
         <View className="flex-1 items-center justify-center bg-black/80 py-6 mx-2 rounded-sm ">

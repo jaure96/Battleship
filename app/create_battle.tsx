@@ -1,4 +1,6 @@
 import GameHeader from "@/components/GameHeader";
+import { useGame } from "@/context/GameContext";
+import { useMatch } from "@/hooks/useMatch";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
 import { useCallback, useState } from "react";
@@ -7,15 +9,24 @@ import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const CreateBattle = () => {
-  const { goBack } = useNavigation();
+  const { goBack, navigate } = useNavigation();
   const { top } = useSafeAreaInsets();
 
-  const [roomName, setRoomName] = useState("");
+  const [battleName, setBattleName] = useState("");
   const [isPublic, setIsPublic] = useState(true);
 
-  const onRoomNameChange = useCallback((val: string) => {
-    setRoomName(val);
-  }, []);
+  const { setMatch } = useGame();
+  const { createMatch } = useMatch(null);
+
+  const handleCreateBattle = useCallback(async () => {
+    const { data, error } = await createMatch(battleName, !isPublic);
+    if (error) console.error(error);
+    if (!error && data) {
+      setMatch(data);
+      //@ts-ignore
+      navigate("battle");
+    }
+  }, [battleName, isPublic, createMatch, navigate, setMatch]);
 
   return (
     <KeyboardAvoidingView
@@ -48,13 +59,13 @@ const CreateBattle = () => {
           <View className="flex-col mt-5">
             <Text className="font-mono text-md color-white">Battle name:</Text>
             <TextInput
-              value={roomName}
+              value={battleName}
               className="bg-slate-400/30 color-white/50 rounded-sm font-mono"
               maxLength={30}
-              onChangeText={onRoomNameChange}
+              onChangeText={(name) => setBattleName(name)}
             />
             <Text className="font-mono text-xs color-white/35">
-              {roomName.length}/30 characters
+              {battleName.length}/30 characters
             </Text>
           </View>
 
@@ -91,6 +102,9 @@ const CreateBattle = () => {
           <TouchableOpacity
             className="bg-background h-10 rounded-s my-6 justify-center"
             activeOpacity={0.8}
+            disabled={battleName.length === 0}
+            style={{ opacity: battleName.length === 0 ? 0.3 : 1 }}
+            onPress={handleCreateBattle}
           >
             <Text className="text-center font-mono-bold text-xl">CREATE</Text>
           </TouchableOpacity>
