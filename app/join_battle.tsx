@@ -28,7 +28,7 @@ const JoinBattle = () => {
   const { toast, setToast, error: errorFn } = useToast();
 
   const isDisabled = useMemo(
-    () => roomCode.length === 0 || isJoining,
+    () => roomCode.length !== 6 || isJoining,
     [isJoining, roomCode]
   );
 
