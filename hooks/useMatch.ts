@@ -13,25 +13,26 @@ export const useMatch = (matchId: string | null) => {
     let mounted = true;
 
     (async () => {
-      const { data: m } = await supabase
-        .from("matches")
-        .select("*")
-        .eq("id", matchId)
-        .single();
-      if (mounted) setMatch(m);
+      try {
+        // Cargar datos iniciales
+        const [{ data: m }, { data: pls }, { data: ms }] = await Promise.all([
+          supabase.from("matches").select("*").eq("id", matchId).single(),
+          supabase.from("match_players").select("*").eq("match_id", matchId),
+          supabase
+            .from("moves")
+            .select("*")
+            .eq("match_id", matchId)
+            .order("move_number", { ascending: true }),
+        ]);
 
-      const { data: pls } = await supabase
-        .from("match_players")
-        .select("*")
-        .eq("match_id", matchId);
-      if (mounted) setPlayers(pls ?? []);
+        if (!mounted) return;
 
-      const { data: ms } = await supabase
-        .from("moves")
-        .select("*")
-        .eq("match_id", matchId)
-        .order("move_number", { ascending: true });
-      if (mounted) setMoves(ms ?? []);
+        setMatch(m);
+        setPlayers(pls ?? []);
+        setMoves(ms ?? []);
+      } catch (error) {
+        console.error("Error loading match data:", error);
+      }
     })();
 
     // suscripciones
@@ -46,10 +47,20 @@ export const useMatch = (matchId: string | null) => {
           filter: `id=eq.${matchId}`,
         },
         (payload) => {
-          setMatch(payload.new ?? payload.old);
+          console.log("Match update received:", payload);
+          // IMPORTANTE: Usar función de actualización para evitar dependencias
+          setMatch((currentMatch: Match) => {
+            // Si es un DELETE, manejar apropiadamente
+            if (payload.eventType === "DELETE") {
+              return null;
+            }
+            return payload.new || currentMatch;
+          });
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("Match channel status:", status);
+      });
 
     const playersChannel = supabase
       .channel(`public:match_players:match_id=eq.${matchId}`)
@@ -66,7 +77,7 @@ export const useMatch = (matchId: string | null) => {
             .from("match_players")
             .select("*")
             .eq("match_id", matchId);
-          setPlayers(pls ?? []);
+          if (mounted) setPlayers(pls ?? []);
         }
       )
       .subscribe();
@@ -82,7 +93,7 @@ export const useMatch = (matchId: string | null) => {
           filter: `match_id=eq.${matchId}`,
         },
         (payload) => {
-          setMoves((prev) => [...prev, payload.new]);
+          if (mounted) setMoves((prev) => [...prev, payload.new]);
         }
       )
       .subscribe();
@@ -95,16 +106,13 @@ export const useMatch = (matchId: string | null) => {
 
     return () => {
       mounted = false;
-      if (channelRefs.current.match)
-        supabase.removeChannel(channelRefs.current.match);
-      if (channelRefs.current.players)
-        supabase.removeChannel(channelRefs.current.players);
-      if (channelRefs.current.moves)
-        supabase.removeChannel(channelRefs.current.moves);
+      Object.values(channelRefs.current).forEach((channel) => {
+        if (channel) supabase.removeChannel(channel);
+      });
+      channelRefs.current = {};
     };
-  }, [matchId, supabase]);
+  }, [matchId, supabase, setMatch]);
 
-  // RPCs
   const createMatch = async (
     name: string,
     isPrivate = false,

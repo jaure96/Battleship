@@ -63,7 +63,7 @@ const Toast = ({ toast, onHide }: Props) => {
       case "warning":
         return "bg-yellow-500";
       default:
-        return "bg-blue-500";
+        return "bg-blue-300";
     }
   };
 
