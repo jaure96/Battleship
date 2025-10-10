@@ -3,8 +3,14 @@ import { useGame } from "@/context/GameContext";
 import { useMatch } from "@/hooks/useMatch";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
-import { useCallback, useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useCallback, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -14,19 +20,31 @@ const CreateBattle = () => {
 
   const [battleName, setBattleName] = useState("");
   const [isPublic, setIsPublic] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   const { setMatch } = useGame();
   const { createMatch } = useMatch(null);
 
   const handleCreateBattle = useCallback(async () => {
-    const { data, error } = await createMatch(battleName, !isPublic);
-    if (error) console.error(error);
-    if (!error && data) {
-      setMatch(data);
-      //@ts-ignore
-      navigate("battle");
+    try {
+      setIsCreating(true);
+      const { data, error } = await createMatch(battleName, !isPublic);
+      if (error) throw new Error(error);
+      if (!error && data) {
+        setMatch(data);
+        setIsCreating(false);
+        //@ts-ignore
+        navigate("battle");
+      }
+    } catch (error) {
+      setIsCreating(false);
     }
   }, [battleName, isPublic, createMatch, navigate, setMatch]);
+
+  const isDisabled = useMemo(
+    () => battleName.length === 0 || isCreating,
+    [isCreating, battleName]
+  );
 
   return (
     <KeyboardAvoidingView
@@ -100,13 +118,16 @@ const CreateBattle = () => {
 
           {/*Button*/}
           <TouchableOpacity
-            className="bg-background h-10 rounded-s my-6 justify-center"
+            className="bg-background h-10 rounded-s my-6 justify-center flex-row items-center gap-3"
             activeOpacity={0.8}
-            disabled={battleName.length === 0}
-            style={{ opacity: battleName.length === 0 ? 0.3 : 1 }}
+            disabled={isDisabled}
+            style={{ opacity: isDisabled ? 0.3 : 1 }}
             onPress={handleCreateBattle}
           >
-            <Text className="text-center font-mono-bold text-xl">CREATE</Text>
+            <Text className="text-center font-mono-bold text-xl">
+              {!isCreating ? "CREATE" : "CREATING..."}
+            </Text>
+            {isCreating && <ActivityIndicator />}
           </TouchableOpacity>
 
           {/*Divider*/}
