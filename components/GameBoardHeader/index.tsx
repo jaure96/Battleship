@@ -1,20 +1,64 @@
-import { Match } from "@/types/match";
-import { useNavigation } from "expo-router";
+import { useToast } from "@/hooks/useToast";
+import { Match, MatchStatus } from "@/types/match";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import * as Clipboard from "expo-clipboard";
 
 import React from "react";
-import { Button, Text, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+import Toast from "../Toast";
 
 type Props = {
   match: Match;
 };
 
 const GameBoardHeader = ({ match }: Props) => {
-  const { navigate } = useNavigation();
+  const { toast, setToast, info } = useToast();
+
+  const copyToClipboard = async () => {
+    await Clipboard.setStringAsync(match.code);
+    info("Match code copied to clipboard!", 2_000);
+  };
+
   return (
-    <View className="h-20 justify-center items-center  bg-red-400">
-      <Text className="text-white text-center">{match.name}</Text>
-      <Text className="text-white text-center">({match.code})</Text>
-      <Button title="Go back" onPress={() => navigate("index")} />
+    <View className="flex-col  bg-black/80 rounded-xl mx-2 px-2 h-28">
+      <Toast toast={toast} onHide={() => setToast(null)} />
+
+      <View className="flex-row ">
+        <View className="flex-1 h-full flex-col gap-2 justify-center">
+          <Text className="text-white text-start font-mono">
+            Name: {match.name}
+          </Text>
+
+          <View className="flex-row items-center">
+            <Text className="text-white text-center font-mono">
+              Code: {match.code}
+            </Text>
+            <TouchableOpacity onPress={copyToClipboard} activeOpacity={0.8}>
+              <MaterialIcons
+                name="content-copy"
+                size={18}
+                color="white"
+                className="ml-2"
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View className="flex-1 h-full flex-col  items-end justify-center gap-2">
+          <TouchableOpacity className="flex-row items-center border-background border-2 rounded-sm px-2 py-1">
+            <Ionicons name="exit-outline" size={24} color="white" />
+            <Text className="text-white text-end font-mono">Leave</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View className="flex-row justify-center items-center ">
+        <Text className="text-white text-center font-mono">
+          {match.status === MatchStatus.WAITING && "Waiting for players..."}
+          {match.status === MatchStatus.PLACING &&
+            "Place your ships and press ready!"}
+        </Text>
+      </View>
     </View>
   );
 };
