@@ -3,6 +3,7 @@ import EnemyTable from "@/components/Tables/EnemyTable";
 import MyTable from "@/components/Tables/MyTable";
 import { useGame } from "@/context/GameContext";
 import { useMatch } from "@/hooks/useMatch";
+import useQuitMatch from "@/hooks/useQuitMatch";
 import { ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -10,7 +11,8 @@ const Battle = () => {
   const { top, bottom } = useSafeAreaInsets();
   const { match } = useGame();
 
-  const {} = useMatch(match?.id ?? null);
+  const { onExit } = useQuitMatch();
+  useMatch(match?.id ?? null);
 
   console.log(match);
 
@@ -21,7 +23,8 @@ const Battle = () => {
         className="flex-1 flex-col bg-background gap-4 "
         style={{ paddingTop: top, paddingBottom: bottom }}
       >
-        <GameBoardHeader match={match} />
+        <GameBoardHeader match={match} onExit={onExit} />
+
         <MyTable />
 
         <EnemyTable />

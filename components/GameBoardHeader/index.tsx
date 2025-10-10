@@ -9,9 +9,10 @@ import Toast from "../Toast";
 
 type Props = {
   match: Match;
+  onExit?: () => void;
 };
 
-const GameBoardHeader = ({ match }: Props) => {
+const GameBoardHeader = ({ match, onExit }: Props) => {
   const { toast, setToast, info } = useToast();
 
   const copyToClipboard = async () => {
@@ -44,10 +45,13 @@ const GameBoardHeader = ({ match }: Props) => {
           </View>
         </View>
 
-        <View className="flex-1 h-full flex-col  items-end justify-center gap-2">
-          <TouchableOpacity className="flex-row items-center border-background border-2 rounded-sm px-2 py-1">
+        <View className="flex-1 h-full flex-col  items-end  justify-start ">
+          <TouchableOpacity
+            className="flex-row items-center p-2"
+            activeOpacity={0.8}
+            onPress={onExit}
+          >
             <Ionicons name="exit-outline" size={24} color="white" />
-            <Text className="text-white text-end font-mono">Leave</Text>
           </TouchableOpacity>
         </View>
       </View>
