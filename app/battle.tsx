@@ -1,9 +1,11 @@
 import GameBoardHeader from "@/components/GameBoardHeader";
+import RadarAnimation from "@/components/RadarAnimation";
 import EnemyTable from "@/components/Tables/EnemyTable";
 import MyTable from "@/components/Tables/MyTable";
 import { useGame } from "@/context/GameContext";
 import { useMatch } from "@/hooks/useMatch";
 import useQuitMatch from "@/hooks/useQuitMatch";
+import { MatchStatus } from "@/types/match";
 import { ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -25,9 +27,14 @@ const Battle = () => {
       >
         <GameBoardHeader match={match} onExit={onExit} />
 
-        <MyTable />
+        {match.status === MatchStatus.WAITING && <RadarAnimation />}
 
-        <EnemyTable />
+        {match.status !== MatchStatus.WAITING && (
+          <>
+            <MyTable />
+            <EnemyTable />
+          </>
+        )}
       </View>
     </ScrollView>
   );
