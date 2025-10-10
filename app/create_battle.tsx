@@ -29,7 +29,7 @@ const CreateBattle = () => {
     try {
       setIsCreating(true);
       const { data, error } = await createMatch(battleName, !isPublic);
-      if (error) throw new Error(error);
+      if (error) throw new Error(error.message);
       if (!error && data) {
         setMatch(data);
         setIsCreating(false);

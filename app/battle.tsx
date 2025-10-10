@@ -24,7 +24,7 @@ const Battle = () => {
         <GameBoardHeader match={match} />
         <MyTable />
 
-        {<EnemyTable />}
+        <EnemyTable />
       </View>
     </ScrollView>
   );

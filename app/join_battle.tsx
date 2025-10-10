@@ -5,33 +5,53 @@ import { useMatch } from "@/hooks/useMatch";
 import { useToast } from "@/hooks/useToast";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
-import { useCallback, useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useCallback, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const JoinBattle = () => {
   const { goBack, navigate } = useNavigation();
   const { top } = useSafeAreaInsets();
+
   const [roomCode, setRoomCode] = useState("");
+  const [isJoining, setIsJoining] = useState(false);
 
   const { setMatch } = useGame();
   const { joinMatchByCode } = useMatch(null);
   const { toast, setToast, error: errorFn } = useToast();
 
+  const isDisabled = useMemo(
+    () => roomCode.length === 0 || isJoining,
+    [isJoining, roomCode]
+  );
+
   const handleJoinBattle = useCallback(async () => {
     try {
       if (roomCode.length !== 6) return;
+      setIsJoining(true);
       const { data, error } = await joinMatchByCode(roomCode);
-      if (error) errorFn(error.message, 3_000);
+      if (error) {
+        errorFn(error.message, 3_000);
+        setIsJoining(false);
+        return;
+      }
 
       if (!error && data) {
         setMatch(data);
         //@ts-ignore
         navigate("battle");
+        setIsJoining(false);
       }
     } catch (e) {
       errorFn("Error joining battle. Try again.", 3_000);
+      setIsJoining(false);
     }
   }, [joinMatchByCode, roomCode]);
 
@@ -87,13 +107,16 @@ const JoinBattle = () => {
             </Text>
 
             <TouchableOpacity
-              className="bg-background h-10 rounded-s my-6 justify-center"
+              className="bg-background h-10 rounded-s my-6 justify-center flex-row items-center gap-3"
               activeOpacity={0.8}
-              disabled={roomCode.length !== 6}
-              style={{ opacity: roomCode.length !== 6 ? 0.3 : 1 }}
+              disabled={isDisabled}
+              style={{ opacity: isDisabled ? 0.3 : 1 }}
               onPress={handleJoinBattle}
             >
-              <Text className="text-center font-mono-bold text-xl">JOIN</Text>
+              <Text className="text-center font-mono-bold text-xl">
+                {isJoining ? "JOIN" : "JOINING..."}
+                <ActivityIndicator />
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
