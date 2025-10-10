@@ -114,8 +114,8 @@ const JoinBattle = () => {
               onPress={handleJoinBattle}
             >
               <Text className="text-center font-mono-bold text-xl">
-                {isJoining ? "JOIN" : "JOINING..."}
-                <ActivityIndicator />
+                {!isJoining ? "JOIN" : "JOINING..."}
+                {isJoining && <ActivityIndicator />}
               </Text>
             </TouchableOpacity>
           </View>
