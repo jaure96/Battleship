@@ -20,23 +20,23 @@ const Battle = () => {
 
   if (match === null) return null;
   return (
-    <ScrollView className="flex-1 bg-background">
-      <View
-        className="flex-1 flex-col bg-background gap-4 "
-        style={{ paddingTop: top, paddingBottom: bottom }}
-      >
-        <GameBoardHeader match={match} onExit={onExit} />
-
-        {match.status === MatchStatus.WAITING && <RadarAnimation />}
-
-        {match.status !== MatchStatus.WAITING && (
-          <>
-            <MyTable />
-            <EnemyTable />
-          </>
-        )}
-      </View>
-    </ScrollView>
+    <View
+      className="flex-1 flex-col bg-background gap-4 "
+      style={{ paddingTop: top, paddingBottom: bottom }}
+    >
+      <GameBoardHeader match={match} onExit={onExit} />
+      {match.status === MatchStatus.WAITING && (
+        <View className="flex-1 items-center justify-center">
+          <RadarAnimation />
+        </View>
+      )}
+      {match.status !== MatchStatus.WAITING && (
+        <ScrollView className="flex-1 bg-background">
+          <MyTable />
+          <EnemyTable />
+        </ScrollView>
+      )}
+    </View>
   );
 };
 

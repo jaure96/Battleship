@@ -55,7 +55,7 @@ export default function Radar() {
   const trianglePath = `M ${RADIUS} ${RADIUS} L ${leftX} ${leftY} A ${RADIUS} ${RADIUS} 0 0 1 ${rightX} ${rightY} Z`;
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 justify-center items-center">
       <View style={styles.radarCircle}>
         {[0.25, 0.5, 0.75, 1].map((scale, i) => (
           <View
@@ -105,7 +105,6 @@ export default function Radar() {
           </Svg>
         </Animated.View>
 
-        {/* Enemy points - distribuidos alrededor del radar */}
         <EnemyPoint x={0.8} y={0.6} beamAngleRef={beamAngle} />
 
         <EnemyPoint x={0.9} y={0.5} beamAngleRef={beamAngle} />
@@ -221,12 +220,6 @@ const EnemyPoint = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#000",
-  },
   radarCircle: {
     width: RADAR_SIZE,
     height: RADAR_SIZE,
