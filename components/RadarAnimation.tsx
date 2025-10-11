@@ -1,5 +1,12 @@
-import React, { useEffect, useRef } from "react";
-import { Animated, Dimensions, Easing, StyleSheet, View } from "react-native";
+import React, { RefObject, useEffect, useRef } from "react";
+import {
+  Animated,
+  Dimensions,
+  Easing,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import Svg, {
   Defs,
   Path,
@@ -55,61 +62,72 @@ export default function Radar() {
   const trianglePath = `M ${RADIUS} ${RADIUS} L ${leftX} ${leftY} A ${RADIUS} ${RADIUS} 0 0 1 ${rightX} ${rightY} Z`;
 
   return (
-    <View className="flex-1 justify-center items-center">
-      <View style={styles.radarCircle}>
-        {[0.25, 0.5, 0.75, 1].map((scale, i) => (
-          <View
-            key={i}
+    <View style={{ width: RADAR_SIZE * 1.2, height: RADAR_SIZE * 1.2 }}>
+      <Text className="color-border font-mono-bold text-center mb-4 text-xl">
+        Waiting your opponent...
+      </Text>
+
+      <View className="flex-1 items-center justify-center ">
+        <View style={styles.radarCircle}>
+          {[0.25, 0.5, 0.75, 1].map((scale, i) => (
+            <View
+              key={i}
+              style={[
+                styles.ring,
+                { borderColor: "#ffcc33" },
+                { width: `${scale * 100}%`, height: `${scale * 100}%` },
+              ]}
+              //className="border-border/60"
+            />
+          ))}
+
+          <Animated.View
             style={[
-              styles.ring,
-              { width: `${scale * 100}%`, height: `${scale * 100}%` },
+              styles.beamContainer,
+              { transform: [{ rotate: rotation }] },
             ]}
-          />
-        ))}
-
-        <Animated.View
-          style={[styles.beamContainer, { transform: [{ rotate: rotation }] }]}
-        >
-          <Svg
-            width={RADAR_SIZE}
-            height={RADAR_SIZE}
-            viewBox={`0 0 ${RADAR_SIZE} ${RADAR_SIZE}`}
           >
-            <Defs>
-              <SvgLinearGradient
-                id="sweepGradient"
-                x1="10%"
-                y1="60%"
-                x2="100%"
-                y2="-20%"
-              >
-                <Stop offset="0%" stopColor="rgba(0,0,0,0)" stopOpacity="0" />
-                <Stop
-                  offset="20%"
-                  stopColor="rgba(0,255,0,2)"
-                  stopOpacity="0.2"
-                />
-                <Stop
-                  offset="50%"
-                  stopColor="rgba(0,255,0,0.4)"
-                  stopOpacity="0.4"
-                />
-                <Stop
-                  offset="100%"
-                  stopColor="rgba(0,255,0,1)"
-                  stopOpacity="1"
-                />
-              </SvgLinearGradient>
-            </Defs>
-            <Path d={trianglePath} fill="url(#sweepGradient)" />
-          </Svg>
-        </Animated.View>
+            <Svg
+              width={RADAR_SIZE}
+              height={RADAR_SIZE}
+              viewBox={`0 0 ${RADAR_SIZE} ${RADAR_SIZE}`}
+            >
+              <Defs>
+                <SvgLinearGradient
+                  id="sweepGradient"
+                  x1="10%"
+                  y1="60%"
+                  x2="100%"
+                  y2="-20%"
+                >
+                  <Stop offset="0%" stopColor="rgba(0,0,0,0)" stopOpacity="0" />
+                  <Stop
+                    offset="20%"
+                    stopColor="rgb(255, 204, 51)"
+                    stopOpacity="0.2"
+                  />
+                  <Stop
+                    offset="50%"
+                    stopColor="rgb(255, 204, 51)"
+                    stopOpacity="0.4"
+                  />
+                  <Stop
+                    offset="100%"
+                    stopColor="rgb(255, 204, 51)"
+                    stopOpacity="1"
+                  />
+                </SvgLinearGradient>
+              </Defs>
+              <Path d={trianglePath} fill="url(#sweepGradient)" />
+            </Svg>
+          </Animated.View>
 
-        <EnemyPoint x={0.8} y={0.6} beamAngleRef={beamAngle} />
+          <EnemyPoint x={0.8} y={0.6} beamAngleRef={beamAngle} />
 
-        <EnemyPoint x={0.9} y={0.5} beamAngleRef={beamAngle} />
+          <EnemyPoint x={0.9} y={0.5} beamAngleRef={beamAngle} />
 
-        <EnemyPoint x={0.1} y={0.5} beamAngleRef={beamAngle} />
+          <EnemyPoint x={0.1} y={0.5} beamAngleRef={beamAngle} />
+        </View>
       </View>
     </View>
   );
@@ -122,7 +140,7 @@ const EnemyPoint = ({
 }: {
   x: number;
   y: number;
-  beamAngleRef: React.MutableRefObject<number>;
+  beamAngleRef: RefObject<number>;
 }) => {
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -213,8 +231,10 @@ const EnemyPoint = ({
           top: `${y * 100}%`,
           opacity: opacityAnim,
           transform: [{ scale: scaleAnim }],
+          backgroundColor: "#ffcc33",
         },
       ]}
+      className="bg-border"
     />
   );
 };
@@ -224,16 +244,15 @@ const styles = StyleSheet.create({
     width: RADAR_SIZE,
     height: RADAR_SIZE,
     borderRadius: RADAR_SIZE / 2,
-    backgroundColor: "#002b55",
     justifyContent: "center",
     alignItems: "center",
     overflow: "hidden",
     position: "relative",
+    backgroundColor: "rgba(0,0,0,0.6)",
   },
   ring: {
     position: "absolute",
     borderWidth: 1,
-    borderColor: "rgba(0,255,0,0.25)",
     borderRadius: 999,
   },
   beamContainer: {
@@ -246,22 +265,11 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: "lime",
     marginLeft: -6,
     marginTop: -6,
     shadowColor: "lime",
     shadowOpacity: 0.8,
     shadowRadius: 6,
     elevation: 5,
-  },
-  referencePoint: {
-    position: "absolute",
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "red",
-    marginLeft: -3,
-    marginTop: -3,
-    opacity: 0.5,
   },
 });

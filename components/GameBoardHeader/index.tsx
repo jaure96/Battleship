@@ -58,7 +58,7 @@ const GameBoardHeader = ({ match, onExit }: Props) => {
 
       <View className="flex-row justify-center items-center ">
         <Text className="text-white text-center font-mono">
-          {match.status === MatchStatus.WAITING && "Waiting for players..."}
+          {match.status === MatchStatus.WAITING && "Pairing..."}
           {match.status === MatchStatus.PLACING &&
             "Place your ships and press ready!"}
         </Text>
