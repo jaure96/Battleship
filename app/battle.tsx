@@ -25,15 +25,21 @@ const Battle = () => {
       style={{ paddingTop: top, paddingBottom: bottom }}
     >
       <GameBoardHeader match={match} onExit={onExit} />
+
       {match.status === MatchStatus.WAITING && (
         <View className="flex-1 items-center justify-center">
           <RadarAnimation />
         </View>
       )}
+
       {match.status !== MatchStatus.WAITING && (
-        <ScrollView className="flex-1 bg-background">
+        <ScrollView
+          contentContainerStyle={{ gap: 16 }}
+          showsVerticalScrollIndicator={false}
+        >
           <MyTable />
-          <EnemyTable />
+
+          {match.status === MatchStatus.IN_PROGRESS && <EnemyTable />}
         </ScrollView>
       )}
     </View>
