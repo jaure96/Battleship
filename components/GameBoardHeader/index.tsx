@@ -3,6 +3,7 @@ import { Match, MatchStatus } from "@/types/match";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 
+import { useGame } from "@/context/GameContext";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import Toast from "../Toast";
@@ -14,6 +15,7 @@ type Props = {
 
 const GameBoardHeader = ({ match, onExit }: Props) => {
   const { toast, setToast, info } = useToast();
+  const { playerId } = useGame();
 
   const copyToClipboard = async () => {
     await Clipboard.setStringAsync(match.code);
@@ -59,8 +61,13 @@ const GameBoardHeader = ({ match, onExit }: Props) => {
       <View className="flex-row justify-center items-center ">
         <Text className="text-white text-center font-mono">
           {match.status === MatchStatus.WAITING && "Pairing..."}
-          {match.status === MatchStatus.PLACING &&
-            "Place your ships and press ready!"}
+          {match.status === MatchStatus.PLACING && "Placing ships..."}
+          {match.status === MatchStatus.IN_PROGRESS &&
+            match.turn_player_id === playerId &&
+            "It's your turn! Shoot 🎯"}
+          {match.status === MatchStatus.IN_PROGRESS &&
+            match.turn_player_id !== playerId &&
+            "Enemy turn🛡️"}
         </Text>
       </View>
     </View>
