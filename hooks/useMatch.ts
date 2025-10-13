@@ -1,4 +1,5 @@
 import { Match } from "@/types/match";
+import { MoveResponse } from "@/types/move";
 import { Ship } from "@/types/ship";
 import { useEffect, useRef, useState } from "react";
 import { useGame } from "../context/GameContext";
@@ -15,7 +16,6 @@ export const useMatch = (matchId: string | null) => {
 
     (async () => {
       try {
-        // Cargar datos iniciales
         const [{ data: m }, { data: pls }, { data: ms }] = await Promise.all([
           supabase.from("matches").select("*").eq("id", matchId).single(),
           supabase.from("match_players").select("*").eq("match_id", matchId),
@@ -36,7 +36,6 @@ export const useMatch = (matchId: string | null) => {
       }
     })();
 
-    // suscripciones
     const matchChannel = supabase
       .channel(`public:matches:id=eq.${matchId}`)
       .on(
@@ -49,7 +48,6 @@ export const useMatch = (matchId: string | null) => {
         },
         (payload) => {
           setMatch((currentMatch: Match) => {
-            // Si es un DELETE, manejar apropiadamente
             if (payload.eventType === "DELETE") {
               return null;
             }
@@ -149,7 +147,10 @@ export const useMatch = (matchId: string | null) => {
     });
   };
 
-  const makeMove = async (x: number, y: number) => {
+  const makeMove = async (
+    x: number,
+    y: number
+  ): Promise<{ data: MoveResponse | null; error: any }> => {
     if (!supabase || !playerId || !matchId) throw new Error("missing");
     return supabase.rpc("rpc_make_move", {
       p_match_id: matchId,
