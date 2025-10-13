@@ -1,4 +1,5 @@
 import { Match } from "@/types/match";
+import { Ship } from "@/types/ship";
 import { useEffect, useRef, useState } from "react";
 import { useGame } from "../context/GameContext";
 
@@ -47,8 +48,6 @@ export const useMatch = (matchId: string | null) => {
           filter: `id=eq.${matchId}`,
         },
         (payload) => {
-          console.log("Match update received:", payload);
-          // IMPORTANTE: Usar función de actualización para evitar dependencias
           setMatch((currentMatch: Match) => {
             // Si es un DELETE, manejar apropiadamente
             if (payload.eventType === "DELETE") {
@@ -58,9 +57,7 @@ export const useMatch = (matchId: string | null) => {
           });
         }
       )
-      .subscribe((status) => {
-        console.log("Match channel status:", status);
-      });
+      .subscribe();
 
     const playersChannel = supabase
       .channel(`public:match_players:match_id=eq.${matchId}`)
@@ -139,7 +136,10 @@ export const useMatch = (matchId: string | null) => {
     });
   };
 
-  const setShipsAndReady = async (shipsJson: any, ready: boolean) => {
+  const setShipsAndReady = async (
+    shipsJson: Ship[],
+    ready: boolean
+  ): Promise<{ data: any | null; error: any }> => {
     if (!supabase || !playerId || !matchId) throw new Error("missing");
     return supabase.rpc("rpc_set_ships_and_ready", {
       p_match_id: matchId,

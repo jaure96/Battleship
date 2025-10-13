@@ -1,14 +1,28 @@
 import { SHIPS } from "@/constants/ships";
 import { BOARD_SIZE, CELLS } from "@/constants/table";
+import { useToast } from "@/hooks/useToast";
+import { Match, MatchStatus } from "@/types/match";
 import { Ship } from "@/types/ship";
 import { isValidPlacement } from "@/utils/placing";
 import React, { useCallback, useMemo, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
+import Toast from "../Toast";
 
-const MyTable = () => {
+type Props = {
+  match: Match;
+  onShipsReady: (
+    shipsJson: Ship[],
+    ready: boolean
+  ) => Promise<{ data: any | null; error: any }>;
+};
+
+const MyTable = ({ match, onShipsReady }: Props) => {
+  const [ready, setReady] = useState(false);
   const [ships, setShips] = useState<Ship[]>(SHIPS);
   const [currentShipIndex, setCurrentShipIndex] = useState(0);
   const [occupied, setOccupied] = useState<Set<string>>(new Set());
+
+  const { toast, setToast, error: toastError } = useToast();
 
   const currentShip = useMemo(
     () => ships[currentShipIndex],
@@ -90,14 +104,27 @@ const MyTable = () => {
     [currentShip?.coords, currentShipIndex, isCurrentShipClosed, ships]
   );
 
-  const resetShips = useCallback(() => {
+  const onResetShipsHandler = useCallback(() => {
     setShips(SHIPS);
     setCurrentShipIndex(0);
     setOccupied(new Set());
   }, []);
 
+  const onReadyPressHandler = useCallback(async () => {
+    try {
+      if (!allShipsPlaced) return;
+      const { error } = await onShipsReady(ships, true);
+      if (error) throw new Error(error.message);
+      setReady(true);
+    } catch (e) {
+      toastError("Error setting ships. Try again.", 3_000);
+    }
+  }, [ships, onShipsReady, allShipsPlaced]);
+
   return (
     <View className="flex-1 items-center justify-center bg-black/80 py-6 mx-2 rounded-sm ">
+      <Toast toast={toast} onHide={() => setToast(null)} />
+
       <View className="aspect-square w-10/12 flex-row flex-wrap border-2 border-border">
         {CELLS.map((_, i) => {
           const x = i % BOARD_SIZE;
@@ -114,45 +141,59 @@ const MyTable = () => {
         })}
       </View>
 
-      <Text className="text-white mt-6 font-mono text-lg">Ships to place</Text>
-      <Text className="text-white  font-mono text-md">
-        (tap the cells to place the ships)
-      </Text>
+      {match.status === MatchStatus.PLACING && !ready && (
+        <>
+          <Text className="text-white mt-6 font-mono text-lg">
+            Ships to place
+          </Text>
+          <Text className="text-white  font-mono text-md">
+            (tap the cells to place the ships)
+          </Text>
 
-      <View className="flex-col mt-3">
-        {ships.map((ship, index) => {
-          const isCurrent = index === currentShipIndex;
-          const isPlaced = ship.coords.length === ship.size;
-          return (
-            <Text
-              key={`ship-${index}`}
-              className={`text-white font-mono text-lg ${
-                isPlaced ? "line-through text-gray-400" : ""
-              } ${isCurrent ? "underline" : ""}`}
+          <View className="flex-col mt-3">
+            {ships.map((ship, index) => {
+              const isCurrent = index === currentShipIndex;
+              const isPlaced = ship.coords.length === ship.size;
+              return (
+                <Text
+                  key={`ship-${index}`}
+                  className={`text-white font-mono text-lg ${
+                    isPlaced ? "line-through text-gray-400" : ""
+                  } ${isCurrent ? "underline" : ""}`}
+                >
+                  {ship.name} ({ship.size}) - {ship.coords.length}/{ship.size}{" "}
+                  placed
+                </Text>
+              );
+            })}
+          </View>
+          <View className="flex-1 flex-row mt-6  w-full justify-around">
+            <TouchableOpacity
+              className="border-red-500 border px-4 py-2 rounded-md"
+              activeOpacity={0.8}
+              onPress={onResetShipsHandler}
             >
-              {ship.name} ({ship.size}) - {ship.coords.length}/{ship.size}{" "}
-              placed
-            </Text>
-          );
-        })}
-      </View>
-      <View className="flex-1 flex-row mt-6  w-full justify-around">
-        <TouchableOpacity
-          className="border-red-500 border px-4 py-2 rounded-md"
-          activeOpacity={0.8}
-          onPress={resetShips}
-        >
-          <Text className="text-red-500 font-mono text-lg">Reset ships</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          className="border-primary  border px-4 py-2 rounded-md"
-          disabled={!allShipsPlaced}
-          activeOpacity={0.8}
-          style={{ opacity: allShipsPlaced ? 1 : 0.5 }}
-        >
-          <Text className="text-primary font-mono text-lg">I'm ready</Text>
-        </TouchableOpacity>
-      </View>
+              <Text className="text-red-500 font-mono text-lg">
+                Reset ships
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="border-primary  border px-4 py-2 rounded-md"
+              disabled={!allShipsPlaced}
+              activeOpacity={0.8}
+              style={{ opacity: allShipsPlaced ? 1 : 0.5 }}
+              onPress={onReadyPressHandler}
+            >
+              <Text className="text-primary font-mono text-lg">I'm ready</Text>
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
+      {match.status === MatchStatus.PLACING && ready && (
+        <Text className="text-white mt-6 font-mono text-lg">
+          Waiting for opponent to place ships...
+        </Text>
+      )}
     </View>
   );
 };

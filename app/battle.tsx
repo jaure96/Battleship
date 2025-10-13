@@ -14,9 +14,7 @@ const Battle = () => {
   const { match } = useGame();
 
   const { onExit } = useQuitMatch();
-  useMatch(match?.id ?? null);
-
-  console.log(match);
+  const { setShipsAndReady } = useMatch(match?.id ?? null);
 
   if (match === null) return null;
   return (
@@ -37,7 +35,10 @@ const Battle = () => {
           contentContainerStyle={{ gap: 16 }}
           showsVerticalScrollIndicator={false}
         >
-          <MyTable />
+          {(match.status === MatchStatus.PLACING ||
+            match.status === MatchStatus.IN_PROGRESS) && (
+            <MyTable match={match} onShipsReady={setShipsAndReady} />
+          )}
 
           {match.status === MatchStatus.IN_PROGRESS && <EnemyTable />}
         </ScrollView>
