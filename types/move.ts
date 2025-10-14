@@ -5,10 +5,10 @@ export enum MoveResult {
 }
 
 export interface MoveResponse {
-  move_id: string;
-  result: MoveResult;
-  sunk_ship_id: string;
-  move_number: number;
-  match_finished: boolean;
-  winner: string;
+  out_move_id: string;
+  out_result: MoveResult;
+  out_sunk_ship_id: string;
+  out_move_number: number;
+  out_match_finished: boolean;
+  out_winner: string;
 }
