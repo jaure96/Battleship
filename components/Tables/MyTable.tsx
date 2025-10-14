@@ -1,12 +1,10 @@
 import { SHIPS } from "@/constants/ships";
 import { BOARD_SIZE, CELLS } from "@/constants/table";
-import { useToast } from "@/hooks/useToast";
 import { Match, MatchStatus } from "@/types/match";
 import { Ship } from "@/types/ship";
 import { isValidPlacement } from "@/utils/placing";
 import React, { useCallback, useMemo, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
-import Toast from "../Toast";
 
 type Props = {
   match: Match;
@@ -14,15 +12,15 @@ type Props = {
     shipsJson: Ship[],
     ready: boolean
   ) => Promise<{ data: any | null; error: any }>;
+  toast: any;
+  toastError: (message: string, duration: number) => void;
 };
 
-const MyTable = ({ match, onShipsReady }: Props) => {
+const MyTable = ({ match, toast, onShipsReady, toastError }: Props) => {
   const [ready, setReady] = useState(false);
   const [ships, setShips] = useState<Ship[]>(SHIPS);
   const [currentShipIndex, setCurrentShipIndex] = useState(0);
   const [occupied, setOccupied] = useState<Set<string>>(new Set());
-
-  const { toast, setToast, error: toastError } = useToast();
 
   const currentShip = useMemo(
     () => ships[currentShipIndex],
@@ -123,8 +121,6 @@ const MyTable = ({ match, onShipsReady }: Props) => {
 
   return (
     <View className="flex-1 items-center justify-center bg-black/80 py-6 mx-2 rounded-sm ">
-      <Toast toast={toast} onHide={() => setToast(null)} />
-
       <View className="aspect-square w-10/12 flex-row flex-wrap border-2 border-border">
         {CELLS.map((_, i) => {
           const x = i % BOARD_SIZE;
@@ -136,6 +132,7 @@ const MyTable = ({ match, onShipsReady }: Props) => {
               className={`w-[10%] h-[10%] border border-border ${colorClass}`}
               activeOpacity={0.8}
               onPress={() => handlePressCell(x, y)}
+              disabled={match.status === MatchStatus.IN_PROGRESS}
             />
           );
         })}

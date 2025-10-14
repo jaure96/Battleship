@@ -3,6 +3,8 @@ import React from "react";
 import { TouchableOpacity, View } from "react-native";
 
 const EnemyTable = () => {
+  toast: any;
+  toastError: (message: string, duration: number) => void;
   return (
     <View className="flex-1 items-center justify-center bg-black/80 py-6 mx-2 rounded-sm ">
       <View className="aspect-square w-10/12 flex-row flex-wrap border-2 border-border">
