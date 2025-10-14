@@ -24,9 +24,3 @@ export interface Move {
   x: number;
   y: number;
 }
-
-export interface SimpleMove {
-  x: number;
-  y: number;
-  result: MoveResult;
-}
