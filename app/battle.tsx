@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 const Battle = () => {
   const { top, bottom } = useSafeAreaInsets();
   const { match } = useGame();
-  const { toast, setToast, error: toastError } = useToast();
+  const { toast, setToast, error } = useToast();
 
   const { onExit } = useQuitMatch();
   const { setShipsAndReady, makeMove } = useMatch(match?.id ?? null);
@@ -44,8 +44,7 @@ const Battle = () => {
             match.status === MatchStatus.IN_PROGRESS) && (
             <MyTable
               match={match}
-              toast={toast}
-              toastError={toastError}
+              toastError={error}
               onShipsReady={setShipsAndReady}
             />
           )}
@@ -53,8 +52,7 @@ const Battle = () => {
           {match.status === MatchStatus.IN_PROGRESS && (
             <EnemyTable
               match={match}
-              toast={toast}
-              toastError={toastError}
+              toastError={error}
               onMakeMove={makeMove}
             />
           )}

@@ -12,11 +12,10 @@ type Props = {
     shipsJson: Ship[],
     ready: boolean
   ) => Promise<{ data: any | null; error: any }>;
-  toast: any;
   toastError: (message: string, duration: number) => void;
 };
 
-const MyTable = ({ match, toast, onShipsReady, toastError }: Props) => {
+const MyTable = ({ match, onShipsReady, toastError }: Props) => {
   const [ready, setReady] = useState(false);
   const [ships, setShips] = useState<Ship[]>(SHIPS);
   const [currentShipIndex, setCurrentShipIndex] = useState(0);

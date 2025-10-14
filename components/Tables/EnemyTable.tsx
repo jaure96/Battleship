@@ -14,11 +14,10 @@ type Props = {
     data: MoveResponse | null;
     error: any;
   }>;
-  toast: any;
   toastError: (message: string, duration: number) => void;
 };
 
-const EnemyTable = ({ match, toast, onMakeMove, toastError }: Props) => {
+const EnemyTable = ({ match, onMakeMove, toastError }: Props) => {
   const [isAttacking, setIsAttacking] = useState(false);
 
   const { playerId } = useGame();
