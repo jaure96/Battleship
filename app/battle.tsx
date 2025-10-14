@@ -17,7 +17,7 @@ const Battle = () => {
   const { toast, setToast, error } = useToast();
 
   const { onExit } = useQuitMatch();
-  const { setShipsAndReady, makeMove } = useMatch(match?.id ?? null);
+  const { moves, setShipsAndReady, makeMove } = useMatch(match?.id ?? null);
 
   if (match === null) return null;
   return (
@@ -44,6 +44,7 @@ const Battle = () => {
             match.status === MatchStatus.IN_PROGRESS) && (
             <MyTable
               match={match}
+              matchMoves={moves}
               toastError={error}
               onShipsReady={setShipsAndReady}
             />
@@ -52,6 +53,7 @@ const Battle = () => {
           {match.status === MatchStatus.IN_PROGRESS && (
             <EnemyTable
               match={match}
+              matchMoves={moves}
               toastError={error}
               onMakeMove={makeMove}
             />

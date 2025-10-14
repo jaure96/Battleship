@@ -1,14 +1,13 @@
 import { Match } from "@/types/match";
-import { MoveResponse } from "@/types/move";
+import { Move, MoveResponse } from "@/types/move";
 import { Ship } from "@/types/ship";
 import { useEffect, useRef, useState } from "react";
 import { useGame } from "../context/GameContext";
 
 export const useMatch = (matchId: string | null) => {
   const { supabase, playerId, setMatch } = useGame();
-  const [players, setPlayers] = useState<any[]>([]);
-  const [moves, setMoves] = useState<any[]>([]);
-  const channelRefs = useRef<{ match?: any; players?: any; moves?: any }>({});
+  const [moves, setMoves] = useState<Move[]>([]);
+  const channelRefs = useRef<{ match?: any; moves?: any }>({});
 
   useEffect(() => {
     if (!matchId || !supabase) return;
@@ -16,9 +15,8 @@ export const useMatch = (matchId: string | null) => {
 
     (async () => {
       try {
-        const [{ data: m }, { data: pls }, { data: ms }] = await Promise.all([
+        const [{ data: m }, { data: ms }] = await Promise.all([
           supabase.from("matches").select("*").eq("id", matchId).single(),
-          supabase.from("match_players").select("*").eq("match_id", matchId),
           supabase
             .from("moves")
             .select("*")
@@ -29,7 +27,6 @@ export const useMatch = (matchId: string | null) => {
         if (!mounted) return;
 
         setMatch(m);
-        setPlayers(pls ?? []);
         setMoves(ms ?? []);
       } catch (error) {
         console.error("Error loading match data:", error);
@@ -57,26 +54,6 @@ export const useMatch = (matchId: string | null) => {
       )
       .subscribe();
 
-    const playersChannel = supabase
-      .channel(`public:match_players:match_id=eq.${matchId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "match_players",
-          filter: `match_id=eq.${matchId}`,
-        },
-        async () => {
-          const { data: pls } = await supabase
-            .from("match_players")
-            .select("*")
-            .eq("match_id", matchId);
-          if (mounted) setPlayers(pls ?? []);
-        }
-      )
-      .subscribe();
-
     const movesChannel = supabase
       .channel(`public:moves:match_id=eq.${matchId}`)
       .on(
@@ -88,14 +65,13 @@ export const useMatch = (matchId: string | null) => {
           filter: `match_id=eq.${matchId}`,
         },
         (payload) => {
-          if (mounted) setMoves((prev) => [...prev, payload.new]);
+          if (mounted) setMoves((prev) => [...prev, payload.new] as Move[]);
         }
       )
       .subscribe();
 
     channelRefs.current = {
       match: matchChannel,
-      players: playersChannel,
       moves: movesChannel,
     };
 
@@ -161,7 +137,6 @@ export const useMatch = (matchId: string | null) => {
   };
 
   return {
-    players,
     moves,
     createMatch,
     joinMatchByCode,

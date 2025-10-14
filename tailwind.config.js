@@ -9,6 +9,12 @@ module.exports = {
         background: "#0099e6", // hsl(220, 25%, 8%)
         foreground: "#e5f0ff", // hsl(210, 100%, 95%)
 
+        /* Ships */
+        cellPlaced: "#00652f",
+        cellTemp: "#00b454",
+        cellHit: "#6f0013",
+        cellMiss: "#4f4f4f",
+
         /* Card / Popover */
         card: "#171c28", // hsl(220, 20%, 12%)
         "card-foreground": "#e5f0ff",

@@ -1,13 +1,17 @@
 import { SHIPS } from "@/constants/ships";
 import { BOARD_SIZE, CELLS } from "@/constants/table";
+import { useGame } from "@/context/GameContext";
 import { Match, MatchStatus } from "@/types/match";
+import { Move, MoveResult } from "@/types/move";
 import { Ship } from "@/types/ship";
+import { getCellMove, getEnemyMoves } from "@/utils/moves";
 import { isValidPlacement } from "@/utils/placing";
 import React, { useCallback, useMemo, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
   match: Match;
+  matchMoves: Move[];
   onShipsReady: (
     shipsJson: Ship[],
     ready: boolean
@@ -15,12 +19,12 @@ type Props = {
   toastError: (message: string, duration: number) => void;
 };
 
-const MyTable = ({ match, onShipsReady, toastError }: Props) => {
+const MyTable = ({ match, matchMoves, onShipsReady, toastError }: Props) => {
   const [ready, setReady] = useState(false);
   const [ships, setShips] = useState<Ship[]>(SHIPS);
   const [currentShipIndex, setCurrentShipIndex] = useState(0);
   const [occupied, setOccupied] = useState<Set<string>>(new Set());
-
+  const { playerId } = useGame();
   const currentShip = useMemo(
     () => ships[currentShipIndex],
     [currentShipIndex, ships]
@@ -35,6 +39,11 @@ const MyTable = ({ match, onShipsReady, toastError }: Props) => {
     () =>
       currentShip ? currentShip.coords.length === currentShip.size : false,
     [currentShip]
+  );
+
+  const enemyMoves = useMemo(
+    () => getEnemyMoves(matchMoves, playerId),
+    [matchMoves, playerId]
   );
 
   const handlePressCell = useCallback(
@@ -92,13 +101,22 @@ const MyTable = ({ match, onShipsReady, toastError }: Props) => {
       const isPreviousShipCell = ships
         .slice(0, currentShipIndex)
         .some((ship) => ship.coords.some((c) => c.x === x && c.y === y));
-
-      if (isCurrentShipCell)
-        return isCurrentShipClosed ? "bg-green-500" : "bg-blue-400";
-      if (isPreviousShipCell) return "bg-blue-800";
-      return "bg-transparent";
+      let bg = "bg-transparent";
+      const move = getCellMove(enemyMoves, { x, y });
+      if (isCurrentShipCell && !isCurrentShipClosed) bg = "bg-cellTemp";
+      if (isPreviousShipCell) bg = "bg-cellPlaced";
+      if (move === MoveResult.HIT || move === MoveResult.SUNK)
+        bg = "bg-cellHit";
+      if (move === MoveResult.MISS) bg = "bg-cellMiss";
+      return bg;
     },
-    [currentShip?.coords, currentShipIndex, isCurrentShipClosed, ships]
+    [
+      currentShip?.coords,
+      currentShipIndex,
+      isCurrentShipClosed,
+      ships,
+      enemyMoves,
+    ]
   );
 
   const onResetShipsHandler = useCallback(() => {
@@ -116,7 +134,7 @@ const MyTable = ({ match, onShipsReady, toastError }: Props) => {
     } catch (e) {
       toastError("Error setting ships. Try again.", 3_000);
     }
-  }, [ships, onShipsReady, allShipsPlaced]);
+  }, [allShipsPlaced, onShipsReady, ships, toastError]);
 
   return (
     <View className="flex-1 items-center justify-center bg-black/80 py-6 mx-2 rounded-sm ">
