@@ -17,7 +17,9 @@ const Battle = () => {
   const { toast, setToast, error } = useToast();
 
   const { onExit } = useQuitMatch();
-  const { moves, setShipsAndReady, makeMove } = useMatch(match?.id ?? null);
+  const { moves, players, setShipsAndReady, makeMove } = useMatch(
+    match?.id ?? null
+  );
 
   if (match === null) return null;
   return (
@@ -54,6 +56,7 @@ const Battle = () => {
             <EnemyTable
               match={match}
               matchMoves={moves}
+              players={players}
               toastError={error}
               onMakeMove={makeMove}
             />

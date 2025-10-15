@@ -6,6 +6,7 @@ import { Move, MoveResult } from "@/types/move";
 import { Ship } from "@/types/ship";
 import { getCellMove, getEnemyMoves } from "@/utils/moves";
 import { isValidPlacement } from "@/utils/placing";
+import { Entypo } from "@expo/vector-icons";
 import React, { useCallback, useMemo, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
@@ -102,13 +103,17 @@ const MyTable = ({ match, matchMoves, onShipsReady, toastError }: Props) => {
         .slice(0, currentShipIndex)
         .some((ship) => ship.coords.some((c) => c.x === x && c.y === y));
       let bg = "bg-transparent";
+      let icon = null;
       const move = getCellMove(enemyMoves, { x, y });
       if (isCurrentShipCell && !isCurrentShipClosed) bg = "bg-cellTemp";
       if (isPreviousShipCell) bg = "bg-cellPlaced";
-      if (move === MoveResult.HIT || move === MoveResult.SUNK)
+      if (move?.result === MoveResult.HIT || move?.result === MoveResult.SUNK)
         bg = "bg-cellHit";
-      if (move === MoveResult.MISS) bg = "bg-cellMiss";
-      return bg;
+      if (move?.result === MoveResult.MISS) {
+        bg = "bg-cellMiss";
+        icon = <Entypo name="circle" color="gray" size={18} />;
+      }
+      return { bg, icon };
     },
     [
       currentShip?.coords,
@@ -138,19 +143,21 @@ const MyTable = ({ match, matchMoves, onShipsReady, toastError }: Props) => {
 
   return (
     <View className="flex-1 items-center justify-center bg-black/80 py-6 mx-2 rounded-sm ">
-      <View className="aspect-square w-10/12 flex-row flex-wrap border-2 border-border">
+      <View className="aspect-square w-10/12 flex-row flex-wrap border-2 border-border items-center justify-center">
         {CELLS.map((_, i) => {
           const x = i % BOARD_SIZE;
           const y = Math.floor(i / BOARD_SIZE);
-          const colorClass = getCellColor(x, y);
+          const { bg, icon } = getCellColor(x, y);
           return (
             <TouchableOpacity
               key={`player-${i}`}
-              className={`w-[10%] h-[10%] border border-border ${colorClass}`}
+              className={`w-[10%] h-[10%] border border-border items-center justify-center ${bg}`}
               activeOpacity={0.8}
               onPress={() => handlePressCell(x, y)}
               disabled={match.status === MatchStatus.IN_PROGRESS}
-            />
+            >
+              {icon}
+            </TouchableOpacity>
           );
         })}
       </View>
@@ -198,7 +205,7 @@ const MyTable = ({ match, matchMoves, onShipsReady, toastError }: Props) => {
               style={{ opacity: allShipsPlaced ? 1 : 0.5 }}
               onPress={onReadyPressHandler}
             >
-              <Text className="text-primary font-mono text-lg">I'm ready</Text>
+              <Text className="text-primary font-mono text-lg">{`I'm ready`}</Text>
             </TouchableOpacity>
           </View>
         </>
