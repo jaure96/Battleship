@@ -16,7 +16,7 @@ const Battle = () => {
   const { match } = useGame();
   const { toast, setToast, error } = useToast();
 
-  const { onExit, msg } = useQuitMatch(match);
+  const { onExit, msg } = useQuitMatch();
 
   if (match === null) return null;
   return (
