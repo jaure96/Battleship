@@ -1,10 +1,10 @@
+import Dialog from "@/components/Diaolog";
 import GameBoardHeader from "@/components/GameBoardHeader";
 import RadarAnimation from "@/components/RadarAnimation";
 import EnemyTable from "@/components/Tables/EnemyTable";
 import MyTable from "@/components/Tables/MyTable";
 import Toast from "@/components/Toast";
 import { useGame } from "@/context/GameContext";
-import { useMatch } from "@/hooks/useMatch";
 import useQuitMatch from "@/hooks/useQuitMatch";
 import { useToast } from "@/hooks/useToast";
 import { MatchStatus } from "@/types/match";
@@ -16,10 +16,7 @@ const Battle = () => {
   const { match } = useGame();
   const { toast, setToast, error } = useToast();
 
-  const { onExit } = useQuitMatch();
-  const { moves, players, setShipsAndReady, makeMove } = useMatch(
-    match?.id ?? null
-  );
+  const { onExit, msg } = useQuitMatch(match);
 
   if (match === null) return null;
   return (
@@ -28,8 +25,14 @@ const Battle = () => {
       style={{ paddingTop: top, paddingBottom: bottom }}
     >
       <Toast toast={toast} onHide={() => setToast(null)} />
-
       <GameBoardHeader match={match} onExit={onExit} />
+      <Dialog
+        visible={msg.visible}
+        onCancel={msg.onCancel}
+        onConfirm={msg.onConfirm}
+        title={msg.title}
+        message={msg.subTitle}
+      />
 
       {match.status === MatchStatus.WAITING && (
         <View className="flex-1 items-center justify-center">
@@ -44,22 +47,11 @@ const Battle = () => {
         >
           {(match.status === MatchStatus.PLACING ||
             match.status === MatchStatus.IN_PROGRESS) && (
-            <MyTable
-              match={match}
-              matchMoves={moves}
-              toastError={error}
-              onShipsReady={setShipsAndReady}
-            />
+            <MyTable toastError={error} />
           )}
 
           {match.status === MatchStatus.IN_PROGRESS && (
-            <EnemyTable
-              match={match}
-              matchMoves={moves}
-              players={players}
-              toastError={error}
-              onMakeMove={makeMove}
-            />
+            <EnemyTable toastError={error} />
           )}
         </ScrollView>
       )}

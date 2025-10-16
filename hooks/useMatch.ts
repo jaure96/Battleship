@@ -2,15 +2,20 @@ import { Match } from "@/types/match";
 import { Move, MoveResponse } from "@/types/move";
 import { Player } from "@/types/player";
 import { Ship } from "@/types/ship";
-import { useEffect, useRef, useState } from "react";
-import { useGame } from "../context/GameContext";
+import { SupabaseClient } from "@supabase/supabase-js";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-export const useMatch = (matchId: string | null) => {
-  const { supabase, playerId, setMatch } = useGame();
+export const useMatch = (
+  supabase: SupabaseClient<any, "public", "public", any, any>,
+  playerId: string | undefined
+) => {
+  const [match, setMatch] = useState<Match | null>(null);
+
   const [players, setPlayers] = useState<Player[]>([]);
   const [moves, setMoves] = useState<Move[]>([]);
   const channelRefs = useRef<{ match?: any; players?: any; moves?: any }>({});
 
+  const matchId = useMemo(() => match?.id, [match?.id]);
   useEffect(() => {
     if (!matchId || !supabase) return;
     let mounted = true;
@@ -48,11 +53,11 @@ export const useMatch = (matchId: string | null) => {
           filter: `id=eq.${matchId}`,
         },
         (payload) => {
-          setMatch((currentMatch: Match) => {
+          setMatch((currentMatch: Match | null) => {
             if (payload.eventType === "DELETE") {
               return null;
             }
-            return payload.new || currentMatch;
+            return (payload.new as Match) || currentMatch;
           });
         }
       )
@@ -161,12 +166,28 @@ export const useMatch = (matchId: string | null) => {
     });
   };
 
-  return {
+  const cancelMatch = async (
+    matchIdToCancel: string
+  ): Promise<{ data: Match | null; error: any }> => {
+    if (!supabase) throw new Error("No supabase");
+    return supabase.rpc("rpc_cancel_match", {
+      p_match_id: matchIdToCancel,
+    });
+  };
+
+  const matchEngineReturn = {
     players,
     moves,
+    match,
+    setMatch,
     createMatch,
     joinMatchByCode,
     setShipsAndReady,
     makeMove,
+    cancelMatch,
   };
+
+  return matchEngineReturn;
 };
+
+export type UseMatchReturn = ReturnType<typeof useMatch>;

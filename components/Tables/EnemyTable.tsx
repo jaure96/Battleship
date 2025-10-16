@@ -1,8 +1,6 @@
 import { BOARD_SIZE, CELLS } from "@/constants/table";
 import { useGame } from "@/context/GameContext";
-import { Match } from "@/types/match";
-import { Move, MoveResponse, MoveResult } from "@/types/move";
-import { Player } from "@/types/player";
+import { MoveResult } from "@/types/move";
 import { Coord } from "@/types/ship";
 import { getCellMove, getEnemySunkCells, getMyMoves } from "@/utils/moves";
 import {
@@ -14,42 +12,23 @@ import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
-  match: Match;
-  matchMoves: Move[];
-  players: Player[];
-  onMakeMove: (
-    x: number,
-    y: number
-  ) => Promise<{
-    data: MoveResponse | null;
-    error: any;
-  }>;
   toastError: (message: string, duration: number) => void;
 };
 
-const EnemyTable = ({
-  match,
-  matchMoves,
-  players,
-  onMakeMove,
-  toastError,
-}: Props) => {
+const EnemyTable = ({ toastError }: Props) => {
+  const { playerId, match, moves, players, makeMove } = useGame();
   const sunkSet = useRef(new Set<string>());
   const [sunkCells, setSunkCells] = useState<Coord[]>([]);
   const [isAttacking, setIsAttacking] = useState(false);
-  const { playerId } = useGame();
   const myTurn = useMemo(
-    () => playerId === match.turn_player_id,
-    [playerId, match.turn_player_id]
+    () => playerId === match?.turn_player_id,
+    [playerId, match?.turn_player_id]
   );
   const tableDisabled = useMemo(
     () => !myTurn || isAttacking,
     [myTurn, isAttacking]
   );
-  const myMoves = useMemo(
-    () => getMyMoves(matchMoves, playerId),
-    [matchMoves, playerId]
-  );
+  const myMoves = useMemo(() => getMyMoves(moves, playerId), [moves, playerId]);
 
   const addSunkCells = (coords: Coord[]) => {
     const newCells: Coord[] = [];
@@ -68,7 +47,7 @@ const EnemyTable = ({
     const x = index % BOARD_SIZE;
     const y = Math.floor(index / BOARD_SIZE);
     try {
-      const { error } = await onMakeMove(x, y);
+      const { error } = await makeMove(x, y);
       if (error) throw new Error(error.message);
       setIsAttacking(false);
     } catch (_e) {

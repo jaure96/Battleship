@@ -1,6 +1,5 @@
 import GameHeader from "@/components/GameHeader";
 import { useGame } from "@/context/GameContext";
-import { useMatch } from "@/hooks/useMatch";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
@@ -17,13 +16,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 const CreateBattle = () => {
   const { goBack, navigate } = useNavigation();
   const { top } = useSafeAreaInsets();
-
+  useGame();
   const [battleName, setBattleName] = useState("");
   const [isPublic, setIsPublic] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
-  const { setMatch } = useGame();
-  const { createMatch } = useMatch(null);
+  const { setMatch, createMatch } = useGame();
 
   const handleCreateBattle = useCallback(async () => {
     try {

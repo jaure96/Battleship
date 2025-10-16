@@ -1,4 +1,4 @@
-import { Match } from "@/types/match";
+import { useMatch, UseMatchReturn } from "@/hooks/useMatch";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import React, { createContext, useContext, useEffect, useState } from "react";
@@ -14,12 +14,9 @@ interface Player {
   token: string;
 }
 
-interface GameContextValue {
-  player: Player | null;
+interface GameContextValue extends UseMatchReturn {
   supabase: SupabaseClient;
   playerId: string | null;
-  match: Match | null;
-  setMatch: React.Dispatch<React.SetStateAction<any | null>>;
   createGuest: (username: string) => Promise<void>;
 }
 
@@ -30,7 +27,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [player, setPlayer] = useState<Player | null>(null);
   const [authedClient, setAuthedClient] = useState<SupabaseClient>(baseClient);
-  const [match, setMatch] = useState<any | null>(null);
+
+  const matchEngine = useMatch(authedClient, player?.id);
 
   useEffect(() => {
     const initPlayer = async () => {
@@ -102,11 +100,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const value: GameContextValue = {
     supabase: authedClient,
-    player,
     playerId: player?.id ?? null,
     createGuest,
-    match,
-    setMatch,
+    ...matchEngine,
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

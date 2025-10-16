@@ -1,7 +1,6 @@
 import GameHeader from "@/components/GameHeader";
 import Toast from "@/components/Toast";
 import { useGame } from "@/context/GameContext";
-import { useMatch } from "@/hooks/useMatch";
 import { useToast } from "@/hooks/useToast";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
@@ -23,8 +22,7 @@ const JoinBattle = () => {
   const [roomCode, setRoomCode] = useState("");
   const [isJoining, setIsJoining] = useState(false);
 
-  const { setMatch } = useGame();
-  const { joinMatchByCode } = useMatch(null);
+  const { setMatch, joinMatchByCode } = useGame();
   const { toast, setToast, error: errorFn } = useToast();
 
   const isDisabled = useMemo(

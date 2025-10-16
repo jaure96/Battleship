@@ -1,8 +1,8 @@
 import { SHIPS } from "@/constants/ships";
 import { BOARD_SIZE, CELLS } from "@/constants/table";
 import { useGame } from "@/context/GameContext";
-import { Match, MatchStatus } from "@/types/match";
-import { Move, MoveResult } from "@/types/move";
+import { MatchStatus } from "@/types/match";
+import { MoveResult } from "@/types/move";
 import { Ship } from "@/types/ship";
 import { getCellMove, getEnemyMoves } from "@/utils/moves";
 import { isValidPlacement } from "@/utils/placing";
@@ -11,21 +11,16 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
-  match: Match;
-  matchMoves: Move[];
-  onShipsReady: (
-    shipsJson: Ship[],
-    ready: boolean
-  ) => Promise<{ data: any | null; error: any }>;
   toastError: (message: string, duration: number) => void;
 };
 
-const MyTable = ({ match, matchMoves, onShipsReady, toastError }: Props) => {
+const MyTable = ({ toastError }: Props) => {
+  const { playerId, moves, setShipsAndReady, match } = useGame();
+
   const [ready, setReady] = useState(false);
   const [ships, setShips] = useState<Ship[]>(SHIPS);
   const [currentShipIndex, setCurrentShipIndex] = useState(0);
   const [occupied, setOccupied] = useState<Set<string>>(new Set());
-  const { playerId } = useGame();
   const currentShip = useMemo(
     () => ships[currentShipIndex],
     [currentShipIndex, ships]
@@ -43,8 +38,8 @@ const MyTable = ({ match, matchMoves, onShipsReady, toastError }: Props) => {
   );
 
   const enemyMoves = useMemo(
-    () => getEnemyMoves(matchMoves, playerId),
-    [matchMoves, playerId]
+    () => getEnemyMoves(moves, playerId),
+    [moves, playerId]
   );
 
   const handlePressCell = useCallback(
@@ -133,13 +128,13 @@ const MyTable = ({ match, matchMoves, onShipsReady, toastError }: Props) => {
   const onReadyPressHandler = useCallback(async () => {
     try {
       if (!allShipsPlaced) return;
-      const { error } = await onShipsReady(ships, true);
+      const { error } = await setShipsAndReady(ships, true);
       if (error) throw new Error(error.message);
       setReady(true);
     } catch (e) {
       toastError("Error setting ships. Try again.", 3_000);
     }
-  }, [allShipsPlaced, onShipsReady, ships, toastError]);
+  }, [allShipsPlaced, setShipsAndReady, ships, toastError]);
 
   return (
     <View className="flex-1 items-center justify-center bg-black/80 py-6 mx-2 rounded-sm ">
@@ -154,7 +149,7 @@ const MyTable = ({ match, matchMoves, onShipsReady, toastError }: Props) => {
               className={`w-[10%] h-[10%] border border-border items-center justify-center ${bg}`}
               activeOpacity={0.8}
               onPress={() => handlePressCell(x, y)}
-              disabled={match.status === MatchStatus.IN_PROGRESS}
+              disabled={match?.status === MatchStatus.IN_PROGRESS}
             >
               {icon}
             </TouchableOpacity>
@@ -162,7 +157,7 @@ const MyTable = ({ match, matchMoves, onShipsReady, toastError }: Props) => {
         })}
       </View>
 
-      {match.status === MatchStatus.PLACING && !ready && (
+      {match?.status === MatchStatus.PLACING && !ready && (
         <>
           <Text className="text-white mt-6 font-mono text-lg">
             Ships to place
@@ -210,7 +205,7 @@ const MyTable = ({ match, matchMoves, onShipsReady, toastError }: Props) => {
           </View>
         </>
       )}
-      {match.status === MatchStatus.PLACING && ready && (
+      {match?.status === MatchStatus.PLACING && ready && (
         <Text className="text-white mt-6 font-mono text-lg">
           Waiting for opponent to place ships...
         </Text>
