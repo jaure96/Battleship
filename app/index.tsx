@@ -1,19 +1,19 @@
 import GameHeader from "@/components/GameHeader";
 import { FontAwesome6, MaterialCommunityIcons } from "@expo/vector-icons";
+import { NavigationProp, ParamListBase } from "@react-navigation/native";
 import { useNavigation } from "expo-router";
 import { useCallback } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { useGame } from "../context/GameContext";
 
 export const Lobby = () => {
-  const { navigate } = useNavigation();
+  const { navigate } = useNavigation<NavigationProp<ParamListBase>>();
   const { createGuest } = useGame();
 
   const handleNavigate = useCallback(
     async (page: string) => {
       try {
         await createGuest(`Guest-${Math.floor(Math.random() * 1000)}`);
-        //@ts-ignore
         navigate(page);
       } catch (error) {}
     },
