@@ -1,29 +1,23 @@
 import GameHeader from "@/components/GameHeader";
 import { FontAwesome6, MaterialCommunityIcons } from "@expo/vector-icons";
-import { NavigationProp, ParamListBase } from "@react-navigation/native";
 import { useNavigation } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { useGame } from "../context/GameContext";
 
 export const Lobby = () => {
-  const navigation = useNavigation<NavigationProp<ParamListBase>>();
-  const [isLoading, setIsLoading] = useState(false);
+  const { navigate } = useNavigation();
   const { createGuest } = useGame();
 
   const handleNavigate = useCallback(
     async (page: string) => {
       try {
-        setIsLoading(true);
         await createGuest(`Guest-${Math.floor(Math.random() * 1000)}`);
-        navigation.navigate(page);
-        setIsLoading(false);
-      } catch (error) {
-        setIsLoading(false);
-        console.error("Navigation error:", error);
-      }
+        //@ts-ignore
+        navigate(page);
+      } catch (error) {}
     },
-    [createGuest, navigation]
+    [createGuest, navigate]
   );
 
   return (
@@ -35,7 +29,6 @@ export const Lobby = () => {
           className="w-full flex flex-row items-center justify-center h-10 bg-background rounded-sm mb-3"
           onPress={() => handleNavigate("create_battle")}
           activeOpacity={0.8}
-          disabled={isLoading}
         >
           <MaterialCommunityIcons name="crown" color={"black"} size={24} />
           <Text className="text-black text-xl ml-3 font-mono">
@@ -46,7 +39,6 @@ export const Lobby = () => {
         <TouchableOpacity
           className="w-full flex flex-row items-center justify-center h-10 border-background border-2 rounded-sm mb-3"
           onPress={() => handleNavigate("join_battle")}
-          disabled={isLoading}
         >
           <FontAwesome6 name="bomb" color={"#0099e6"} size={24} />
           <Text className="text-background text-xl  ml-3 font-mono">
