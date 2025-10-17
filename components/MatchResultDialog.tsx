@@ -212,7 +212,6 @@ const MatchResultDialog = ({
   onConfirm,
   onCancel,
   isWin = false,
-  isDefeat = false,
 }: MatchResultDialogProps) => {
   return (
     <Modal
@@ -222,8 +221,7 @@ const MatchResultDialog = ({
       onRequestClose={onCancel}
     >
       <View className="flex-1 bg-black/50 items-center justify-center">
-        {isWin && <Confetti />}
-        {isDefeat && <RainEffect />}
+        {isWin ? <Confetti /> : <RainEffect />}
         <View className="bg-white w-80 rounded-2xl p-5 shadow-lg">
           <Text className="text-xl font-mono-bold text-center mb-3">
             {title}
