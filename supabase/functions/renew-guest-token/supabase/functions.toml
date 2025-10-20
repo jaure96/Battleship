@@ -1,0 +1,3 @@
+name = "renew-guest-token"
+runtime = "deno"
+entrypoint = "index.ts"
