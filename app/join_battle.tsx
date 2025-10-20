@@ -97,7 +97,7 @@ const JoinBattle = () => {
               value={roomCode}
               className="bg-slate-400/30 color-white/50 rounded-sm font-mono"
               maxLength={6}
-              onChangeText={(val) => setRoomCode(val)}
+              onChangeText={(val) => setRoomCode(val.toUpperCase())}
               placeholder="example: F3GS45"
             />
             <Text className="font-mono text-xs color-white/35">
