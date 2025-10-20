@@ -18,6 +18,7 @@ interface GameContextValue extends UseMatchReturn {
   supabase: SupabaseClient;
   playerId: string | null;
   createGuest: (username: string) => Promise<void>;
+  renewGuestToken: (oldToken: string) => Promise<boolean>;
 }
 
 const GameContext = createContext<GameContextValue | undefined>(undefined);
@@ -29,6 +30,37 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   const [authedClient, setAuthedClient] = useState<SupabaseClient>(baseClient);
 
   const matchEngine = useMatch(authedClient, player?.id);
+
+  const renewGuestToken = async (oldToken: string): Promise<boolean> => {
+    try {
+      const { data, error } = await baseClient.functions.invoke(
+        "renew-guest-token",
+        {
+          body: { token: oldToken },
+        }
+      );
+
+      if (error) throw error;
+
+      const newToken = data.token as string;
+      const newPlayer = {
+        id: data.user.id,
+        username: data.user.nickname,
+        token: newToken,
+      };
+
+      await AsyncStorage.setItem("player", JSON.stringify(newPlayer));
+      setPlayer(newPlayer);
+      const authed = createClient(supabaseUrl, supabaseAnonKey, {
+        global: { headers: { Authorization: `Bearer ${newToken}` } },
+      });
+      setAuthedClient(authed);
+      return true;
+    } catch (err) {
+      console.error("❌ Error renewing guest token:", err);
+      return false;
+    }
+  };
 
   useEffect(() => {
     const initPlayer = async () => {
@@ -46,8 +78,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           setPlayer(parsed);
           return;
         } else {
-          // Expired token
-          await AsyncStorage.removeItem("player");
+          console.log("Token expired, attempting renewal...");
+          // Expired token, attempt to renew
+          const renewed = await renewGuestToken(parsed.token);
+          if (renewed) {
+            return;
+          } else {
+            await AsyncStorage.removeItem("player");
+          }
         }
       }
     };
@@ -67,6 +105,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           });
           setAuthedClient(authed);
           return;
+        } else {
+          // Expired token, attempt to renew
+          const renewed = await renewGuestToken(parsed.token);
+          if (renewed) {
+            return;
+          }
+          // If renewal failed, proceed to create a new token
         }
       }
 
@@ -102,6 +147,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     supabase: authedClient,
     playerId: player?.id ?? null,
     createGuest,
+    renewGuestToken,
     ...matchEngine,
   };
 
