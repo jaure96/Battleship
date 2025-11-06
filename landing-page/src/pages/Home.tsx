@@ -1,6 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Ship, Crown, Bomb, Shield, Target, Menu, X } from "lucide-react";
+import {
+  Ship,
+  Crown,
+  Bomb,
+  Shield,
+  Target,
+  Menu,
+  X,
+  Swords,
+} from "lucide-react";
 import StepCard from "../components/StepCard";
 import FeatureCard from "../components/FeatureCard";
 
@@ -14,7 +23,11 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center space-x-3">
-              <Ship className="w-8 h-8 text-[#FFC107]" />
+              <img
+                src="/icon.png"
+                alt="Battleship Logo"
+                className="w-10 h-10"
+              />
               <span className="text-2xl font-bold text-white tracking-tight">
                 Battleship
               </span>
@@ -98,10 +111,11 @@ const Home = () => {
       <section className="pt-32 pb-20 px-4">
         <div className="max-w-7xl mx-auto text-center">
           <div className="mb-8 flex justify-center">
-            <div className="relative">
-              <Ship className="w-24 h-24 text-white drop-shadow-2xl" />
-              <Crown className="w-12 h-12 text-[#FFC107] absolute -top-2 -right-2 animate-pulse" />
-            </div>
+            <img
+              src="/icon-white.png"
+              alt="Battleship App Icon"
+              className="w-24 h-24 md:w-32 md:h-32"
+            />
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
@@ -143,7 +157,7 @@ const Home = () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <FeatureCard
-              icon={<Crown className="w-12 h-12 text-[#FFC107]" />}
+              icon={<Swords className="w-12 h-12 text-[#FFC107]" />}
               title="Create Your Battle"
               description="Be the captain and create your own battle room. Configure your fleet and invite opponents with a unique battle code."
             />
