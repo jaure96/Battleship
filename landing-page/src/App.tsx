@@ -1,10 +1,13 @@
+import { Route, Routes } from "react-router-dom";
+import Home from "./pages/Home";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+
 function App() {
   return (
-    <div className="bg-slate-500  h-screen flex items-center justify-center">
-      <h1 className="text-3xl font-bold  text-white">
-        Battleship landing page!
-      </h1>
-    </div>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/privacyPolicy" element={<PrivacyPolicy />} />
+    </Routes>
   );
 }
 
