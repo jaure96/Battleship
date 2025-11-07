@@ -53,7 +53,7 @@ const Home = () => {
                 Privacy
               </Link>
               <a
-                href="https://play.google.com/store"
+                href="https://play.google.com/store/apps/details?id=com.xjauregi.battleship"
                 className="bg-[#FFC107] text-[#0D1B2A] px-6 py-2 rounded-lg font-semibold hover:bg-[#FFD54F] transition-all transform hover:scale-105"
               >
                 Download Now
@@ -97,7 +97,7 @@ const Home = () => {
                 Privacy
               </Link>
               <a
-                href="https://play.google.com/store"
+                href="https://play.google.com/store/apps/details?id=com.xjauregi.battleship"
                 className="block bg-[#FFC107] text-[#0D1B2A] px-6 py-2 rounded-lg font-semibold text-center"
               >
                 Download Now
@@ -133,7 +133,7 @@ const Home = () => {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <a
-              href="https://play.google.com/store"
+              href="https://play.google.com/store/apps/details?id=com.xjauregi.battleship"
               className="bg-[#FFC107] text-[#0D1B2A] px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#FFD54F] transition-all transform hover:scale-105 shadow-2xl flex items-center space-x-2"
             >
               <span>Get it on Google Play</span>
@@ -244,7 +244,7 @@ const Home = () => {
             Download now and start battling with friends!
           </p>
           <a
-            href="https://play.google.com/store"
+            href="https://play.google.com/store/apps/details?id=com.xjauregi.battleship"
             className="inline-block bg-[#FFC107] text-[#0D1B2A] px-12 py-5 rounded-xl font-bold text-xl hover:bg-[#FFD54F] transition-all transform hover:scale-105 shadow-2xl"
           >
             Download on Google Play
