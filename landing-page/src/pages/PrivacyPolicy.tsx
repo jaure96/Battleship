@@ -255,9 +255,7 @@ const PrivacyPolicy = () => {
                 <p className="text-gray-700 font-semibold mb-2">
                   Battleship App
                 </p>
-                <p className="text-gray-700">
-                  Email: privacy@battleship-app.com
-                </p>
+                <p className="text-gray-700">Email: x.jauregi96@gmail.com</p>
               </div>
             </section>
 
