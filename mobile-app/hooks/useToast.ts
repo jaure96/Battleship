@@ -1,8 +1,8 @@
-import { Toast, ToastType } from "@/types/toast";
+import { ToastDef, ToastType } from "@/types/toast";
 import { useState } from "react";
 
 export const useToast = () => {
-  const [toast, setToast] = useState<Toast | null>(null);
+  const [toast, setToast] = useState<ToastDef | null>(null);
 
   const show = (
     message: string,
