@@ -6,7 +6,14 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
 
-const baseClient = createClient(supabaseUrl, supabaseAnonKey);
+const baseClient = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    storage: AsyncStorage,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false,
+  },
+});
 
 interface Player {
   id: string;
@@ -17,8 +24,6 @@ interface Player {
 interface GameContextValue extends UseMatchReturn {
   supabase: SupabaseClient;
   playerId: string | null;
-  createGuest: (username: string) => Promise<void>;
-  renewGuestToken: (oldToken: string) => Promise<boolean>;
 }
 
 const GameContext = createContext<GameContextValue | undefined>(undefined);
@@ -31,123 +36,121 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const matchEngine = useMatch(authedClient, player?.id);
 
-  const renewGuestToken = async (oldToken: string): Promise<boolean> => {
-    try {
-      const { data, error } = await baseClient.functions.invoke(
-        "renew-guest-token",
-        {
-          body: { token: oldToken },
-        }
-      );
-
-      if (error) throw error;
-
-      const newToken = data.token as string;
-      const newPlayer = {
-        id: data.user.id,
-        username: data.user.nickname,
-        token: newToken,
-      };
-
-      await AsyncStorage.setItem("player", JSON.stringify(newPlayer));
-      setPlayer(newPlayer);
-      const authed = createClient(supabaseUrl, supabaseAnonKey, {
-        global: { headers: { Authorization: `Bearer ${newToken}` } },
-      });
-      setAuthedClient(authed);
-      return true;
-    } catch (err) {
-      console.error("❌ Error renewing guest token:", err);
-      return false;
-    }
-  };
-
   useEffect(() => {
-    const initPlayer = async () => {
-      const stored = await AsyncStorage.getItem("player");
-      if (stored) {
-        const parsed: Player = JSON.parse(stored);
-        const decoded = parseJwt(parsed.token);
+    const initAuth = async () => {
+      const { data } = await baseClient.auth.getSession();
 
-        if (decoded && decoded.exp * 1000 > Date.now()) {
-          // Valid token
+      if (data.session) {
+        const { user, access_token } = data.session;
+        const newPlayer = {
+          id: user.id,
+          username: user.user_metadata.username || "Guest",
+          token: access_token,
+        };
+        await AsyncStorage.setItem("player", JSON.stringify(newPlayer));
+        setPlayer(newPlayer);
+        const authed = createClient(supabaseUrl, supabaseAnonKey, {
+          global: { headers: { Authorization: `Bearer ${access_token}` } },
+          auth: {
+            storage: AsyncStorage,
+            autoRefreshToken: true,
+            persistSession: true,
+            detectSessionInUrl: false,
+          },
+        });
+        setAuthedClient(authed);
+      } else {
+        try {
+          const { data: signInData, error: signInError } =
+            await baseClient.auth.signInAnonymously();
+
+          if (signInError) throw signInError;
+          if (!signInData.session || !signInData.user)
+            throw new Error(
+              "No session or user returned after anonymous sign-in."
+            );
+
+          const { user, session } = signInData;
+          const newPlayer = {
+            id: user.id,
+            username:
+              user.user_metadata.username ||
+              `Guest-${Math.floor(Math.random() * 1000)}`,
+            token: session.access_token,
+          };
+
+          // Update user metadata with a default username if not already set
+          if (!user.user_metadata.username) {
+            await baseClient.auth.updateUser({
+              data: { username: newPlayer.username },
+            });
+          }
+
+          await AsyncStorage.setItem("player", JSON.stringify(newPlayer));
+          setPlayer(newPlayer);
           const authed = createClient(supabaseUrl, supabaseAnonKey, {
-            global: { headers: { Authorization: `Bearer ${parsed.token}` } },
+            global: {
+              headers: { Authorization: `Bearer ${session.access_token}` },
+            },
+            auth: {
+              storage: AsyncStorage,
+              autoRefreshToken: true,
+              persistSession: true,
+              detectSessionInUrl: false,
+            },
           });
           setAuthedClient(authed);
-          setPlayer(parsed);
-          return;
-        } else {
-          console.log("Token expired, attempting renewal...");
-          // Expired token, attempt to renew
-          const renewed = await renewGuestToken(parsed.token);
-          if (renewed) {
-            return;
-          } else {
-            await AsyncStorage.removeItem("player");
-          }
+        } catch (err) {
+          console.error(
+            "❌ GameContext: initAuth - Error creating anonymous guest:",
+            err
+          );
+          await AsyncStorage.removeItem("player");
+          setPlayer(null);
+          setAuthedClient(baseClient);
         }
       }
     };
-    initPlayer();
-  }, []);
 
-  const createGuest = async (username: string) => {
-    try {
-      const stored = await AsyncStorage.getItem("player");
-      if (stored) {
-        const parsed: Player = JSON.parse(stored);
-        const decoded = parseJwt(parsed.token);
-        if (decoded && decoded.exp * 1000 > Date.now()) {
-          setPlayer(parsed);
+    initAuth();
+
+    const { data: authListener } = baseClient.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session) {
+          const { user, access_token } = session;
+          const newPlayer = {
+            id: user.id,
+            username: user.user_metadata.username || "Guest",
+            token: access_token,
+          };
+          await AsyncStorage.setItem("player", JSON.stringify(newPlayer));
+          setPlayer(newPlayer);
           const authed = createClient(supabaseUrl, supabaseAnonKey, {
-            global: { headers: { Authorization: `Bearer ${parsed.token}` } },
+            global: { headers: { Authorization: `Bearer ${access_token}` } },
+            auth: {
+              storage: AsyncStorage,
+              autoRefreshToken: true,
+              persistSession: true,
+              detectSessionInUrl: false,
+            },
           });
           setAuthedClient(authed);
-          return;
         } else {
-          // Expired token, attempt to renew
-          const renewed = await renewGuestToken(parsed.token);
-          if (renewed) {
-            return;
-          }
-          // If renewal failed, proceed to create a new token
+          await AsyncStorage.removeItem("player");
+          setPlayer(null);
+          setAuthedClient(baseClient);
         }
       }
+    );
 
-      // Llama al edge function solo si es necesario
-      const { data, error } = await baseClient.functions.invoke(
-        "generate-guest-token",
-        {
-          body: { nickname: username },
-        }
-      );
-
-      if (error) throw error;
-
-      const token = data.token as string;
-      const decoded = parseJwt(token);
-      const id = decoded?.sub ?? crypto.randomUUID();
-
-      const newPlayer = { id, username, token };
-      await AsyncStorage.setItem("player", JSON.stringify(newPlayer));
-
-      const authed = createClient(supabaseUrl, supabaseAnonKey, {
-        global: { headers: { Authorization: `Bearer ${token}` } },
-      });
-
-      setAuthedClient(authed);
-      setPlayer(newPlayer);
-    } catch (err) {
-      console.error("❌ Error creating guest:", err);
-    }
-  };
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   const value: GameContextValue = {
     supabase: authedClient,
     playerId: player?.id ?? null,
-    createGuest,
-    renewGuestToken,
     ...matchEngine,
   };
 
@@ -158,20 +161,4 @@ export const useGame = () => {
   const ctx = useContext(GameContext);
   if (!ctx) throw new Error("useGame must be used inside GameProvider");
   return ctx;
-};
-
-const parseJwt = (token: string): any => {
-  try {
-    const base64Url = token.split(".")[1];
-    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split("")
-        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-        .join("")
-    );
-    return JSON.parse(jsonPayload);
-  } catch {
-    return null;
-  }
 };
