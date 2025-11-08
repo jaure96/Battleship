@@ -1,2 +1,0 @@
-name = "generate-guest-token"
-verify_jwt = false
