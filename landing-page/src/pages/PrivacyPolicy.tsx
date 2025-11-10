@@ -31,7 +31,7 @@ const PrivacyPolicy = () => {
           <h1 className="text-4xl font-bold text-[#0D1B2A] mb-4">
             Privacy Policy
           </h1>
-          <p className="text-gray-600 mb-8">Last updated: Novenber 10, 2025</p>
+          <p className="text-gray-600 mb-8">Last updated: November 10, 2025</p>
 
           <div className="prose prose-lg max-w-none">
             {/* INTRODUCTION */}
