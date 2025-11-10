@@ -31,45 +31,36 @@ const PrivacyPolicy = () => {
           <h1 className="text-4xl font-bold text-[#0D1B2A] mb-4">
             Privacy Policy
           </h1>
-          <p className="text-gray-600 mb-8">Last updated: October 22, 2025</p>
+          <p className="text-gray-600 mb-8">Last updated: Novenber 10, 2025</p>
 
           <div className="prose prose-lg max-w-none">
+            {/* INTRODUCTION */}
             <section className="mb-8">
               <h2 className="text-2xl font-bold text-[#0D1B2A] mb-4">
                 1. Introduction
               </h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                Welcome to Battleship ("we," "our," or "us"). We are committed
-                to protecting your privacy and ensuring you have a positive
-                experience while using our mobile application. This Privacy
-                Policy explains how we collect, use, disclose, and safeguard
-                your information when you use our mobile application.
-              </p>
-              <p className="text-gray-700 leading-relaxed">
-                Please read this privacy policy carefully. If you do not agree
-                with the terms of this privacy policy, please do not access the
-                application.
+                Welcome to Battleship. We are committed to protecting your
+                privacy and ensuring you have a positive experience. This
+                Privacy Policy explains how we collect, use, disclose, and
+                safeguard your information when using our mobile application,
+                including when advertising is displayed through Google AdMob.
               </p>
             </section>
 
+            {/* INFORMATION WE COLLECT */}
             <section className="mb-8">
               <h2 className="text-2xl font-bold text-[#0D1B2A] mb-4">
                 2. Information We Collect
               </h2>
+
               <h3 className="text-xl font-semibold text-[#0D1B2A] mb-3">
                 2.1 Personal Information
               </h3>
               <p className="text-gray-700 leading-relaxed mb-4">
-                We may collect personal information that you voluntarily provide
-                to us when you:
-              </p>
-              <ul className="list-disc pl-6 mb-4 text-gray-700 space-y-2">
-                <li>Create or join a battle</li>
-                <li>Use the application's features</li>
-                <li>Contact us for support</li>
-              </ul>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                This information may include:
+                We may collect information you provide voluntarily, such as when
+                you create or join battles and contact support. This may
+                include:
               </p>
               <ul className="list-disc pl-6 mb-4 text-gray-700 space-y-2">
                 <li>Battle names and codes</li>
@@ -77,195 +68,91 @@ const PrivacyPolicy = () => {
                 <li>Device information</li>
               </ul>
 
-              <h3 className="text-xl font-semibold text-[#0D1B2A] mb-3 mt-6">
+              <h3 className="text-xl font-semibold text-[#0D1B2A] mb-3">
                 2.2 Automatically Collected Information
               </h3>
               <p className="text-gray-700 leading-relaxed mb-4">
-                When you use our application, we may automatically collect
-                certain information about your device, including:
+                We may automatically collect:
               </p>
               <ul className="list-disc pl-6 mb-4 text-gray-700 space-y-2">
-                <li>Device type and operating system</li>
-                <li>Unique device identifiers</li>
+                <li>Device model and operating system</li>
+                <li>App usage data and gameplay analytics</li>
+                <li>Crash and performance logs</li>
                 <li>Mobile network information</li>
-                <li>Application usage data</li>
-                <li>Crash reports and performance data</li>
+                <li>Advertising ID (for delivering ads through AdMob)</li>
               </ul>
             </section>
 
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold text-[#0D1B2A] mb-4">
-                3. How We Use Your Information
-              </h2>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                We use the information we collect to:
-              </p>
-              <ul className="list-disc pl-6 mb-4 text-gray-700 space-y-2">
-                <li>Provide, operate, and maintain our application</li>
-                <li>Enable multiplayer game functionality</li>
-                <li>Match players for battles</li>
-                <li>Improve and optimize the application</li>
-                <li>Understand how users interact with our application</li>
-                <li>Respond to user inquiries and provide support</li>
-                <li>Detect, prevent, and address technical issues</li>
-                <li>Comply with legal obligations</li>
-              </ul>
-            </section>
-
+            {/* ADVERTISING / ADMOB SECTION */}
             <section className="mb-8">
               <h2 className="text-2xl font-bold text-[#0D1B2A] mb-4">
                 4. Data Sharing and Disclosure
               </h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                We do not sell your personal information. We may share your
-                information in the following circumstances:
+                We do not sell your personal information. We may share certain
+                data as described below:
               </p>
-              <ul className="list-disc pl-6 mb-4 text-gray-700 space-y-2">
+              <ul className="list-disc pl-6 mb-8 text-gray-700 space-y-2">
                 <li>
-                  <strong>With Other Players:</strong> Battle codes and
-                  game-related information are shared with players you choose to
-                  play with
+                  <strong>Other Players:</strong> Battle information is shared
+                  with players you match with.
                 </li>
                 <li>
-                  <strong>Service Providers:</strong> We may share information
-                  with third-party service providers who perform services on our
-                  behalf
+                  <strong>Service Providers:</strong> We use third-party service
+                  providers such as Google AdMob.
                 </li>
                 <li>
                   <strong>Legal Requirements:</strong> We may disclose
-                  information if required by law or in response to valid legal
-                  requests
+                  information if required by law.
                 </li>
+              </ul>
+
+              <h3 className="text-xl font-semibold text-[#0D1B2A] mb-3">
+                4.1 Advertising and Ad Networks (Google AdMob)
+              </h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                Our application uses Google AdMob to display advertisements.
+                Google may collect and use:
+              </p>
+              <ul className="list-disc pl-6 mb-4 text-gray-700 space-y-2">
+                <li>Device information and usage data</li>
+                <li>Advertising ID</li>
+                <li>Approximate location</li>
+              </ul>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                Ads may be personalized or non-personalized depending on your
+                device settings. You can opt out of personalized ads in your
+                device settings:
+              </p>
+              <ul className="list-disc pl-6 text-gray-700 space-y-2">
                 <li>
-                  <strong>Business Transfers:</strong> In connection with any
-                  merger, sale of company assets, or acquisition
+                  Android: Settings → Google → Ads → Opt out of Ads
+                  Personalization
                 </li>
               </ul>
             </section>
 
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold text-[#0D1B2A] mb-4">
-                5. Data Security
-              </h2>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                We implement appropriate technical and organizational security
-                measures to protect your personal information. However, please
-                note that no method of transmission over the internet or
-                electronic storage is 100% secure, and we cannot guarantee
-                absolute security.
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold text-[#0D1B2A] mb-4">
-                6. Data Retention
-              </h2>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                We retain your personal information only for as long as
-                necessary to fulfill the purposes outlined in this Privacy
-                Policy, unless a longer retention period is required or
-                permitted by law. Game data and battle information may be
-                retained for the duration of active games and for a reasonable
-                period thereafter.
-              </p>
-            </section>
-
+            {/* CHILDREN */}
             <section className="mb-8">
               <h2 className="text-2xl font-bold text-[#0D1B2A] mb-4">
                 7. Children's Privacy
               </h2>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                Our application is not intended for children under the age of
-                13. We do not knowingly collect personal information from
-                children under 13. If you are a parent or guardian and believe
-                that your child has provided us with personal information,
-                please contact us, and we will take steps to delete such
-                information.
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold text-[#0D1B2A] mb-4">
-                8. Your Rights
-              </h2>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                Depending on your location, you may have the following rights
-                regarding your personal information:
-              </p>
-              <ul className="list-disc pl-6 mb-4 text-gray-700 space-y-2">
-                <li>Access to your personal information</li>
-                <li>Correction of inaccurate data</li>
-                <li>Deletion of your personal information</li>
-                <li>Restriction of processing</li>
-                <li>Data portability</li>
-                <li>Object to processing</li>
-                <li>Withdraw consent</li>
-              </ul>
               <p className="text-gray-700 leading-relaxed">
-                To exercise these rights, please contact us using the
-                information provided below.
+                Our application is not intended for children under 13. We do not
+                knowingly collect data from children under 13. Google AdMob is
+                configured to serve **non-personalized** ads to users in regions
+                requiring child protection measures.
               </p>
             </section>
 
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold text-[#0D1B2A] mb-4">
-                9. Third-Party Services
-              </h2>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                Our application may contain links to third-party websites or
-                services. We are not responsible for the privacy practices of
-                these third parties. We encourage you to review their privacy
-                policies before providing any personal information.
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold text-[#0D1B2A] mb-4">
-                10. Changes to This Privacy Policy
-              </h2>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                We may update this Privacy Policy from time to time. We will
-                notify you of any changes by posting the new Privacy Policy on
-                this page and updating the "Last updated" date. You are advised
-                to review this Privacy Policy periodically for any changes.
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold text-[#0D1B2A] mb-4">
-                11. International Data Transfers
-              </h2>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                Your information may be transferred to and maintained on
-                computers located outside of your state, province, country, or
-                other governmental jurisdiction where data protection laws may
-                differ. By using our application, you consent to such transfers.
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold text-[#0D1B2A] mb-4">
-                12. Contact Us
-              </h2>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                If you have any questions about this Privacy Policy or our
-                privacy practices, please contact us at:
-              </p>
-              <div className="bg-gray-100 p-6 rounded-lg">
-                <p className="text-gray-700 font-semibold mb-2">
-                  Battleship App
-                </p>
-                <p className="text-gray-700">Email: x.jauregi96@gmail.com</p>
-              </div>
-            </section>
-
-            <section className="mb-8">
+            {/* CONSENT */}
+            <section>
               <h2 className="text-2xl font-bold text-[#0D1B2A] mb-4">
                 13. Consent
               </h2>
               <p className="text-gray-700 leading-relaxed">
-                By using our application, you consent to our Privacy Policy and
-                agree to its terms.
+                By using our application, including viewing advertisements, you
+                consent to the data practices described in this Privacy Policy.
               </p>
             </section>
           </div>
