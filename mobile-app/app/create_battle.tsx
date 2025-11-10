@@ -1,5 +1,6 @@
 import GameHeader from "@/components/GameHeader";
 import { useGame } from "@/context/GameContext";
+import useAdMob from "@/hooks/useAdMob";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
@@ -10,18 +11,32 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import {
+  BannerAd,
+  BannerAdSize,
+  TestIds,
+} from "react-native-google-mobile-ads";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const CreateBattle = () => {
+  const { shouldDisplayAds } = useAdMob();
   const { goBack, navigate } = useNavigation();
-  const { top } = useSafeAreaInsets();
+  const { top, bottom } = useSafeAreaInsets();
   useGame();
   const [battleName, setBattleName] = useState("");
   const [isPublic, setIsPublic] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
   const { setMatch, createMatch } = useGame();
+
+  const adUnitId = useMemo(
+    () =>
+      __DEV__
+        ? TestIds.ADAPTIVE_BANNER
+        : "ca-app-pub-2357304452833824/5873387209",
+    []
+  );
 
   const handleCreateBattle = useCallback(async () => {
     try {
@@ -48,7 +63,7 @@ const CreateBattle = () => {
     <KeyboardAvoidingView
       behavior={"padding"}
       keyboardVerticalOffset={0}
-      style={{ flex: 1 }}
+      style={{ flex: 1, marginBottom: bottom }}
     >
       <View className="flex-1 justify-center items-center bg-background px-6">
         {/* Go back button*/}
@@ -139,6 +154,12 @@ const CreateBattle = () => {
           </View>
         </View>
       </View>
+      {shouldDisplayAds && (
+        <BannerAd
+          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+          unitId={adUnitId}
+        />
+      )}
     </KeyboardAvoidingView>
   );
 };
