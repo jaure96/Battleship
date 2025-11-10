@@ -19,7 +19,6 @@ type MatchResultDialogProps = {
   onConfirm?: () => void;
   onCancel?: () => void;
   isWin?: boolean;
-  isDefeat?: boolean;
 };
 
 const ConfettiParticle = ({ index }: { index: number }) => {
