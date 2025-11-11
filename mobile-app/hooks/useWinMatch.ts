@@ -68,9 +68,13 @@ const useWinMatch = () => {
   }, []);
 
   const onConfirm = useCallback(() => {
-    interstitial.show();
-    //navigate("index");
-  }, [navigate]);
+    // Show ad if loaded, otherwise navigate immediately
+    if (adLoaded) {
+      interstitial.show();
+    } else {
+      navigate("index");
+    }
+  }, [adLoaded, interstitial, navigate]);
 
   useEffect(() => {
     if (match?.status !== MatchStatus.FINISHED) return;
