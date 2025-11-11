@@ -1,7 +1,8 @@
-import { GameProvider } from "@/context/GameContext";
 import { useFonts } from "expo-font";
 import { Slot } from "expo-router";
 import { KeyboardProvider } from "react-native-keyboard-controller";
+import { AdMobProvider } from "@/context/AdMobContext/AdMobContext";
+import { GameProvider } from "@/context/GameContext";
 import "../global.css";
 
 const RootLayout = () => {
@@ -12,11 +13,13 @@ const RootLayout = () => {
 
   if (!fontsLoaded) return null;
   return (
-    <KeyboardProvider>
-      <GameProvider>
-        <Slot />
-      </GameProvider>
-    </KeyboardProvider>
+    <AdMobProvider>
+      <KeyboardProvider>
+        <GameProvider>
+          <Slot />
+        </GameProvider>
+      </KeyboardProvider>
+    </AdMobProvider>
   );
 };
 

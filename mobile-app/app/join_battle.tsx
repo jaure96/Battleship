@@ -1,6 +1,7 @@
 import GameHeader from "@/components/GameHeader";
 import Toast from "@/components/Toast";
 import { useGame } from "@/context/GameContext";
+import useAdMob from "@/hooks/useAdMob";
 import { useToast } from "@/hooks/useToast";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
@@ -12,12 +13,18 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import {
+  BannerAd,
+  BannerAdSize,
+  TestIds,
+} from "react-native-google-mobile-ads";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const JoinBattle = () => {
+  const { shouldDisplayAds } = useAdMob();
   const { goBack, navigate } = useNavigation();
-  const { top } = useSafeAreaInsets();
+  const { top, bottom } = useSafeAreaInsets();
 
   const [roomCode, setRoomCode] = useState("");
   const [isJoining, setIsJoining] = useState(false);
@@ -28,6 +35,14 @@ const JoinBattle = () => {
   const isDisabled = useMemo(
     () => roomCode.length !== 6 || isJoining,
     [isJoining, roomCode]
+  );
+
+  const adUnitId = useMemo(
+    () =>
+      __DEV__
+        ? TestIds.ADAPTIVE_BANNER
+        : "ca-app-pub-2357304452833824/9190364426",
+    []
   );
 
   const handleJoinBattle = useCallback(async () => {
@@ -57,7 +72,7 @@ const JoinBattle = () => {
     <KeyboardAvoidingView
       behavior={"padding"}
       keyboardVerticalOffset={0}
-      style={{ flex: 1 }}
+      style={{ flex: 1, marginBottom: bottom }}
     >
       <Toast toast={toast} onHide={() => setToast(null)} />
       <View className="flex-1 justify-center items-center bg-background px-6">
@@ -121,6 +136,12 @@ const JoinBattle = () => {
 
         {/*<PublicRooms containerClass="mt-10 px-10" />*/}
       </View>
+      {shouldDisplayAds && (
+        <BannerAd
+          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+          unitId={adUnitId}
+        />
+      )}
     </KeyboardAvoidingView>
   );
 };
