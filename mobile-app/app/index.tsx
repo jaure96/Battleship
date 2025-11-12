@@ -1,11 +1,29 @@
 import GameHeader from "@/components/GameHeader";
+import useAdMob from "@/hooks/useAdMob";
 import { FontAwesome6, MaterialCommunityIcons } from "@expo/vector-icons";
 import { NavigationProp, ParamListBase } from "@react-navigation/native";
 import { useNavigation } from "expo-router";
+import { useMemo } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
+import {
+  BannerAd,
+  BannerAdSize,
+  TestIds,
+} from "react-native-google-mobile-ads";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export const Lobby = () => {
   const { navigate } = useNavigation<NavigationProp<ParamListBase>>();
+  const { bottom } = useSafeAreaInsets();
+  const { shouldDisplayAds } = useAdMob();
+
+  const adUnitId = useMemo(
+    () =>
+      __DEV__
+        ? TestIds.ADAPTIVE_BANNER
+        : "ca-app-pub-2357304452833824/5553306083",
+    []
+  );
 
   return (
     <View className="flex-1 justify-center items-center bg-background px-6 ">
@@ -33,6 +51,15 @@ export const Lobby = () => {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {shouldDisplayAds && (
+        <View className="absolute w-full items-center" style={{ bottom }}>
+          <BannerAd
+            size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+            unitId={adUnitId}
+          />
+        </View>
+      )}
     </View>
   );
 };
