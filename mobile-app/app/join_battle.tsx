@@ -7,8 +7,15 @@ import useAdMob from "@/hooks/useAdMob";
 import { useToast } from "@/hooks/useToast";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import { useCallback, useMemo, useState, useEffect } from "react";
+import {
+  ActivityIndicator,
+  Animated,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import {
   BannerAd,
   BannerAdSize,
@@ -25,6 +32,71 @@ const JoinBattle = () => {
   const [roomCode, setRoomCode] = useState("");
   const [isJoining, setIsJoining] = useState(false);
   const [isPrivateSearch, setIsPrivateSearch] = useState(true);
+
+  // Animation values for lock icons
+  const lockOpenRotation = useMemo(() => new Animated.Value(0), []);
+  const lockOpenOpacity = useMemo(() => new Animated.Value(1), []);
+  const lockClosedRotation = useMemo(() => new Animated.Value(0), []);
+  const lockClosedOpacity = useMemo(() => new Animated.Value(0), []);
+
+  // Trigger animation when switch toggles
+  useEffect(() => {
+    if (isPrivateSearch) {
+      // Animate to private (lock-closed visible)
+      Animated.parallel([
+        Animated.timing(lockOpenRotation, {
+          toValue: 180,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(lockOpenOpacity, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(lockClosedRotation, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(lockClosedOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      // Animate to public (lock-open visible)
+      Animated.parallel([
+        Animated.timing(lockOpenRotation, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(lockOpenOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(lockClosedRotation, {
+          toValue: -180,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(lockClosedOpacity, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [
+    isPrivateSearch,
+    lockOpenRotation,
+    lockOpenOpacity,
+    lockClosedRotation,
+    lockClosedOpacity,
+  ]);
 
   const { setMatch, joinMatchByCode } = useGame();
   const { toast, setToast, error: errorFn } = useToast();
@@ -95,17 +167,58 @@ const JoinBattle = () => {
             <FontAwesome6 name="bomb" color="#ffcc33" size={55} />
           </View>
           <View className="flex-col ">
-            <View>
-              {/*TODO Toggle private/public */}
-              <View className="flex-row content-center items-center gap-1">
-                <Ionicons
-                  name={`lock-${true ? "closed" : "open"}-outline`}
-                  color="#ffcc33"
-                  size={24}
-                />
+            <View className="flex-row content-between w-full items-center my-3">
+              <View className="flex-1 flex-row ">
                 <Text className="font-mono text-xl color-white">
                   {isPrivateSearch ? "Private" : "Public"} battle
                 </Text>
+              </View>
+
+              <View className="flex-row">
+                <Animated.View
+                  style={{
+                    transform: [
+                      {
+                        rotateZ: lockOpenRotation.interpolate({
+                          inputRange: [0, 180],
+                          outputRange: ["0deg", "180deg"],
+                        }),
+                      },
+                    ],
+                    opacity: lockOpenOpacity,
+                  }}
+                >
+                  <Ionicons
+                    name={`lock-open-outline`}
+                    color="#ffcc33"
+                    size={24}
+                  />
+                </Animated.View>
+                <Switch
+                  trackColor={{ false: "#767577", true: "#0099e6" }}
+                  thumbColor={isPrivateSearch ? "#204060" : "#a8abb3"}
+                  onValueChange={() => setIsPrivateSearch((prev) => !prev)}
+                  value={isPrivateSearch}
+                />
+                <Animated.View
+                  style={{
+                    transform: [
+                      {
+                        rotateZ: lockClosedRotation.interpolate({
+                          inputRange: [-180, 0],
+                          outputRange: ["-180deg", "0deg"],
+                        }),
+                      },
+                    ],
+                    opacity: lockClosedOpacity,
+                  }}
+                >
+                  <Ionicons
+                    name={`lock-closed-outline`}
+                    color="#ffcc33"
+                    size={24}
+                  />
+                </Animated.View>
               </View>
             </View>
 
