@@ -6,6 +6,7 @@ import { useNavigation } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Switch,
   Text,
   TextInput,
   TouchableOpacity,
@@ -101,7 +102,7 @@ const CreateBattle = () => {
           </View>
 
           {/*Public or private room */}
-          {/* <View className="flex-row items-center justify-between p-4 my-3 border-2 border-border bg-muted/20">
+          <View className="flex-row items-center justify-between p-4 my-3 border-2 border-border bg-muted/20">
             <View className="flex-row gap-2">
               <View className="flex-row justify-center align-middle items-center  gap-2">
                 {isPublic ? (
@@ -127,7 +128,7 @@ const CreateBattle = () => {
                 value={isPublic}
               />
             </View>
-          </View>*/}
+          </View>
 
           {/*Button*/}
           <TouchableOpacity
