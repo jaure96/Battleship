@@ -1,4 +1,6 @@
 import GameHeader from "@/components/GameHeader";
+import PrivateRoom from "@/components/PrivateRoom";
+import PublicRooms from "@/components/PublicRooms";
 import Toast from "@/components/Toast";
 import { useGame } from "@/context/GameContext";
 import useAdMob from "@/hooks/useAdMob";
@@ -6,13 +8,7 @@ import { useToast } from "@/hooks/useToast";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import {
   BannerAd,
   BannerAdSize,
@@ -28,6 +24,7 @@ const JoinBattle = () => {
 
   const [roomCode, setRoomCode] = useState("");
   const [isJoining, setIsJoining] = useState(false);
+  const [isPrivateSearch, setIsPrivateSearch] = useState(true);
 
   const { setMatch, joinMatchByCode } = useGame();
   const { toast, setToast, error: errorFn } = useToast();
@@ -45,28 +42,31 @@ const JoinBattle = () => {
     []
   );
 
-  const handleJoinBattle = useCallback(async () => {
-    try {
-      if (roomCode.length !== 6) return;
-      setIsJoining(true);
-      const { data, error } = await joinMatchByCode(roomCode);
-      if (error) {
-        errorFn(error.message, 3_000);
-        setIsJoining(false);
-        return;
-      }
+  const handleJoinBattle = useCallback(
+    async (code: string) => {
+      try {
+        if (code.length !== 6) return;
+        setIsJoining(true);
+        const { data, error } = await joinMatchByCode(code);
+        if (error) {
+          errorFn(error.message, 3_000);
+          setIsJoining(false);
+          return;
+        }
 
-      if (!error && data) {
-        setMatch(data);
-        //@ts-ignore
-        navigate("battle");
+        if (!error && data) {
+          setMatch(data);
+          //@ts-ignore
+          navigate("battle");
+          setIsJoining(false);
+        }
+      } catch (e) {
+        errorFn("Error joining battle. Try again.", 3_000);
         setIsJoining(false);
       }
-    } catch (e) {
-      errorFn("Error joining battle. Try again.", 3_000);
-      setIsJoining(false);
-    }
-  }, [joinMatchByCode, roomCode]);
+    },
+    [joinMatchByCode, navigate, setMatch, errorFn]
+  );
 
   return (
     <KeyboardAvoidingView
@@ -76,7 +76,6 @@ const JoinBattle = () => {
     >
       <Toast toast={toast} onHide={() => setToast(null)} />
       <View className="flex-1 justify-center items-center bg-background px-6">
-        {/* Go back button*/}
         <TouchableOpacity
           className="absolute left-2"
           style={{ top }}
@@ -96,35 +95,32 @@ const JoinBattle = () => {
             <FontAwesome6 name="bomb" color="#ffcc33" size={55} />
           </View>
           <View className="flex-col ">
-            {/*
+            <View>
+              {/*TODO Toggle private/public */}
               <View className="flex-row content-center items-center gap-1">
-                <Ionicons name="search" color="#ffcc33" size={24} />
+                <Ionicons
+                  name={`lock-${true ? "closed" : "open"}-outline`}
+                  color="#ffcc33"
+                  size={24}
+                />
                 <Text className="font-mono text-xl color-white">
-                  Search battle
+                  {isPrivateSearch ? "Private" : "Public"} battle
                 </Text>
               </View>
-            */}
-            <Text className="font-mono text-md color-white mt-3">
-              Enter battle code:
-            </Text>
+            </View>
 
-            <TextInput
-              value={roomCode}
-              className="bg-slate-400/30 color-white/50 rounded-sm font-mono"
-              maxLength={6}
-              onChangeText={(val) => setRoomCode(val.toUpperCase())}
-              placeholder="example: F3GS45"
-            />
-            <Text className="font-mono text-xs color-white/35">
-              {roomCode.length}/6 characters
-            </Text>
+            {isPrivateSearch && (
+              <PrivateRoom roomCode={roomCode} setRoomCode={setRoomCode} />
+            )}
+
+            {!isPrivateSearch && <PublicRooms />}
 
             <TouchableOpacity
               className="bg-background h-10 rounded-s my-6 justify-center flex-row items-center gap-3"
               activeOpacity={0.8}
               disabled={isDisabled}
               style={{ opacity: isDisabled ? 0.3 : 1 }}
-              onPress={handleJoinBattle}
+              onPress={() => handleJoinBattle(roomCode)}
             >
               <Text className="text-center font-mono-bold text-xl">
                 {!isJoining ? "JOIN" : "JOINING..."}
@@ -133,8 +129,6 @@ const JoinBattle = () => {
             </TouchableOpacity>
           </View>
         </View>
-
-        {/*<PublicRooms containerClass="mt-10 px-10" />*/}
       </View>
       {shouldDisplayAds && (
         <BannerAd

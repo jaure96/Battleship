@@ -4,18 +4,25 @@ import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
-  room: Match;
-  onJoinBattle?: () => void;
+  battle: Match;
+  isSelected?: boolean;
+  onSelect?: (battle: Match) => void;
 };
 
-const RoomListItem = ({ room, onJoinBattle }: Props) => {
+const BattleListItem = ({
+  battle,
+  isSelected = false,
+  onSelect = () => {},
+}: Props) => {
   return (
     <View className="flex-row h-15 border-2 border-border justify-between items-center py-2 my-1 px-2">
       <View className="flex-col gap-1">
         <View className="flex-row gap-2 items-center">
           <Fontisto name="world-o" color="#ffcc33" size={12} />
           <Text className="text-white font-mono">
-            {room.name.length > 15 ? `${room.name.slice(0, 15)}…` : room.name}
+            {battle.name.length > 15
+              ? `${battle.name.slice(0, 15)}…`
+              : battle.name}
           </Text>
         </View>
         <View className="flex-row gap-2 items-center">
@@ -27,12 +34,12 @@ const RoomListItem = ({ room, onJoinBattle }: Props) => {
       <TouchableOpacity
         activeOpacity={0.8}
         className="bg-transparent  py-2 px-4 border-background border-[1px] rounded-s  justify-center items-center"
-        onPress={onJoinBattle}
+        onPress={() => onSelect(battle)}
       >
-        <Text className="font-mono text-background">Join </Text>
+        <Text className="font-mono text-background">Select </Text>
       </TouchableOpacity>
     </View>
   );
 };
 
-export default RoomListItem;
+export default BattleListItem;
