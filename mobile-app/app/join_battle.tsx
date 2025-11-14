@@ -170,7 +170,7 @@ const JoinBattle = () => {
             <View className="flex-row content-between w-full items-center my-3">
               <View className="flex-1 flex-row ">
                 <Text className="font-mono text-xl color-white">
-                  {isPrivateSearch ? "Private" : "Public"} battle
+                  {isPrivateSearch ? "Private battle" : "Public battles"}
                 </Text>
               </View>
 
@@ -189,16 +189,16 @@ const JoinBattle = () => {
                   }}
                 >
                   <Ionicons
-                    name={`lock-open-outline`}
+                    name={`lock-closed-outline`}
                     color="#ffcc33"
                     size={24}
                   />
                 </Animated.View>
                 <Switch
                   trackColor={{ false: "#767577", true: "#0099e6" }}
-                  thumbColor={isPrivateSearch ? "#204060" : "#a8abb3"}
+                  thumbColor={!isPrivateSearch ? "#204060" : "#a8abb3"}
                   onValueChange={() => setIsPrivateSearch((prev) => !prev)}
-                  value={isPrivateSearch}
+                  value={!isPrivateSearch}
                 />
                 <Animated.View
                   style={{
@@ -214,7 +214,7 @@ const JoinBattle = () => {
                   }}
                 >
                   <Ionicons
-                    name={`lock-closed-outline`}
+                    name={`lock-open-outline`}
                     color="#ffcc33"
                     size={24}
                   />
@@ -223,23 +223,26 @@ const JoinBattle = () => {
             </View>
 
             {isPrivateSearch && (
-              <PrivateRoom roomCode={roomCode} setRoomCode={setRoomCode} />
+              <>
+                <PrivateRoom roomCode={roomCode} setRoomCode={setRoomCode} />
+                <TouchableOpacity
+                  className="bg-background h-10 rounded-s my-6 justify-center flex-row items-center gap-3"
+                  activeOpacity={0.8}
+                  disabled={isDisabled}
+                  style={{ opacity: isDisabled ? 0.3 : 1 }}
+                  onPress={() => handleJoinBattle(roomCode)}
+                >
+                  <Text className="text-center font-mono-bold text-xl">
+                    {!isJoining ? "JOIN" : "JOINING..."}
+                    {isJoining && <ActivityIndicator />}
+                  </Text>
+                </TouchableOpacity>
+              </>
             )}
 
-            {!isPrivateSearch && <PublicRooms />}
-
-            <TouchableOpacity
-              className="bg-background h-10 rounded-s my-6 justify-center flex-row items-center gap-3"
-              activeOpacity={0.8}
-              disabled={isDisabled}
-              style={{ opacity: isDisabled ? 0.3 : 1 }}
-              onPress={() => handleJoinBattle(roomCode)}
-            >
-              <Text className="text-center font-mono-bold text-xl">
-                {!isJoining ? "JOIN" : "JOINING..."}
-                {isJoining && <ActivityIndicator />}
-              </Text>
-            </TouchableOpacity>
+            {!isPrivateSearch && (
+              <PublicRooms onJoinBattle={handleJoinBattle} onError={errorFn} />
+            )}
           </View>
         </View>
       </View>
