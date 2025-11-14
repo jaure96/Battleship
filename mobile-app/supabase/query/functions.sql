@@ -116,11 +116,13 @@ $$ language plpgsql security definer;
 -- 4) rpc_make_move: completo
 -- Resumen de la lógica:
 --  - valida que el match está in_progress y que es el turno del jugador
+--  - valida que la celda no haya sido disparada previamente
 --  - comprueba si el disparo golpea alguna coord del oponente
 --  - si golpea, marca la coordenada como "hit": true en match_players.ships del oponente
 --  - detecta si ese barco ha quedado hundido (todos coords con hit=true)
 --  - si hunde el último barco del oponente, marca match finished y winner_player_id
 --  - inserta fila en moves con result: miss|hit|sunk y sunk_ship_id opcional
+--  - TURNO: si acierta (hit|sunk), el mismo jugador repite turno. Si falla (miss), pasa al oponente
 create or replace function public.rpc_make_move(
   p_match_id uuid,
   p_by_player_id uuid,
@@ -178,6 +180,11 @@ begin
 
   if v_opponent is null then
     raise exception using message = 'Opponent missing';
+  end if;
+
+  -- check if this cell has already been shot
+  if exists (select 1 from public.moves where match_id = p_match_id and x = p_x and y = p_y) then
+    raise exception using message = 'Cell already shot';
   end if;
 
   -- next move number
@@ -278,9 +285,12 @@ begin
     out_match_finished := true;
     out_winner := p_by_player_id;
   else
-    update public.matches
-    set turn_player_id = v_opponent.id
-    where id = p_match_id;
+    -- if miss, change turn to opponent; if hit/sunk, keep same player's turn
+    if out_result = 'miss' then
+      update public.matches
+      set turn_player_id = v_opponent.id
+      where id = p_match_id;
+    end if;
     out_match_finished := false;
     out_winner := null;
   end if;
