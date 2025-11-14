@@ -24,9 +24,7 @@ const useWinMatch = () => {
 
   const adUnitId = useMemo(
     () =>
-      __DEV__
-        ? TestIds.INTERSTITIAL
-        : "cca-app-pub-2357304452833824/9238465885",
+      __DEV__ ? TestIds.INTERSTITIAL : "ca-app-pub-2357304452833824/9238465885",
     []
   );
   const interstitial = InterstitialAd.createForAdRequest(adUnitId);
