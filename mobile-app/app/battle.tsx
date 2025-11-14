@@ -45,7 +45,7 @@ const Battle = () => {
     >
       <Toast toast={toast} onHide={() => setToast(null)} />
       <MatchResultDialog visible={isMatchEnd} {...matchEndProps} />
-      <GameBoardHeader match={match} onExit={onExit} />
+      <GameBoardHeader onExit={onExit} />
       <Dialog
         visible={msg.visible}
         onCancel={msg.onCancel}

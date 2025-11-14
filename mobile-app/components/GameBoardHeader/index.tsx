@@ -1,5 +1,5 @@
 import { useToast } from "@/hooks/useToast";
-import { Match, MatchStatus } from "@/types/match";
+import { MatchStatus } from "@/types/match";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 
@@ -9,19 +9,19 @@ import { Text, TouchableOpacity, View } from "react-native";
 import Toast from "../Toast";
 
 type Props = {
-  match: Match;
   onExit?: () => void;
 };
 
-const GameBoardHeader = ({ match, onExit }: Props) => {
+const GameBoardHeader = ({ onExit }: Props) => {
   const { toast, setToast, info } = useToast();
-  const { playerId } = useGame();
+  const { playerId, match } = useGame();
 
   const copyToClipboard = async () => {
-    await Clipboard.setStringAsync(match.code);
+    await Clipboard.setStringAsync(match?.code || "");
     info("Match code copied to clipboard!", 2_000);
   };
 
+  if (!match) return null;
   return (
     <View className="flex-col  bg-black/80 rounded-xl mx-2 px-2 h-28">
       <Toast toast={toast} onHide={() => setToast(null)} />
