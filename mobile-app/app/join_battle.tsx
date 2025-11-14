@@ -1,15 +1,18 @@
 import GameHeader from "@/components/GameHeader";
+import PrivateRoom from "@/components/PrivateRoom";
+import PublicRooms from "@/components/PublicRooms";
 import Toast from "@/components/Toast";
 import { useGame } from "@/context/GameContext";
 import useAdMob from "@/hooks/useAdMob";
 import { useToast } from "@/hooks/useToast";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 import {
   ActivityIndicator,
+  Animated,
+  Switch,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -28,6 +31,72 @@ const JoinBattle = () => {
 
   const [roomCode, setRoomCode] = useState("");
   const [isJoining, setIsJoining] = useState(false);
+  const [isPrivateSearch, setIsPrivateSearch] = useState(true);
+
+  // Animation values for lock icons
+  const lockOpenRotation = useMemo(() => new Animated.Value(0), []);
+  const lockOpenOpacity = useMemo(() => new Animated.Value(1), []);
+  const lockClosedRotation = useMemo(() => new Animated.Value(0), []);
+  const lockClosedOpacity = useMemo(() => new Animated.Value(0), []);
+
+  // Trigger animation when switch toggles
+  useEffect(() => {
+    if (isPrivateSearch) {
+      // Animate to private (lock-closed visible)
+      Animated.parallel([
+        Animated.timing(lockOpenRotation, {
+          toValue: 180,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(lockOpenOpacity, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(lockClosedRotation, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(lockClosedOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      // Animate to public (lock-open visible)
+      Animated.parallel([
+        Animated.timing(lockOpenRotation, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(lockOpenOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(lockClosedRotation, {
+          toValue: -180,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(lockClosedOpacity, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [
+    isPrivateSearch,
+    lockOpenRotation,
+    lockOpenOpacity,
+    lockClosedRotation,
+    lockClosedOpacity,
+  ]);
 
   const { setMatch, joinMatchByCode } = useGame();
   const { toast, setToast, error: errorFn } = useToast();
@@ -45,28 +114,31 @@ const JoinBattle = () => {
     []
   );
 
-  const handleJoinBattle = useCallback(async () => {
-    try {
-      if (roomCode.length !== 6) return;
-      setIsJoining(true);
-      const { data, error } = await joinMatchByCode(roomCode);
-      if (error) {
-        errorFn(error.message, 3_000);
-        setIsJoining(false);
-        return;
-      }
+  const handleJoinBattle = useCallback(
+    async (code: string) => {
+      try {
+        if (code.length !== 6) return;
+        setIsJoining(true);
+        const { data, error } = await joinMatchByCode(code);
+        if (error) {
+          errorFn(error.message, 3_000);
+          setIsJoining(false);
+          return;
+        }
 
-      if (!error && data) {
-        setMatch(data);
-        //@ts-ignore
-        navigate("battle");
+        if (!error && data) {
+          setMatch(data);
+          //@ts-ignore
+          navigate("battle");
+          setIsJoining(false);
+        }
+      } catch (e) {
+        errorFn("Error joining battle. Try again.", 3_000);
         setIsJoining(false);
       }
-    } catch (e) {
-      errorFn("Error joining battle. Try again.", 3_000);
-      setIsJoining(false);
-    }
-  }, [joinMatchByCode, roomCode]);
+    },
+    [joinMatchByCode, navigate, setMatch, errorFn]
+  );
 
   return (
     <KeyboardAvoidingView
@@ -76,7 +148,6 @@ const JoinBattle = () => {
     >
       <Toast toast={toast} onHide={() => setToast(null)} />
       <View className="flex-1 justify-center items-center bg-background px-6">
-        {/* Go back button*/}
         <TouchableOpacity
           className="absolute left-2"
           style={{ top }}
@@ -96,45 +167,84 @@ const JoinBattle = () => {
             <FontAwesome6 name="bomb" color="#ffcc33" size={55} />
           </View>
           <View className="flex-col ">
-            {/*
-              <View className="flex-row content-center items-center gap-1">
-                <Ionicons name="search" color="#ffcc33" size={24} />
+            <View className="flex-row content-between w-full items-center my-3">
+              <View className="flex-1 flex-row ">
                 <Text className="font-mono text-xl color-white">
-                  Search battle
+                  {isPrivateSearch ? "Private battle" : "Public battles"}
                 </Text>
               </View>
-            */}
-            <Text className="font-mono text-md color-white mt-3">
-              Enter battle code:
-            </Text>
 
-            <TextInput
-              value={roomCode}
-              className="bg-slate-400/30 color-white/50 rounded-sm font-mono"
-              maxLength={6}
-              onChangeText={(val) => setRoomCode(val.toUpperCase())}
-              placeholder="example: F3GS45"
-            />
-            <Text className="font-mono text-xs color-white/35">
-              {roomCode.length}/6 characters
-            </Text>
+              <View className="flex-row">
+                <Animated.View
+                  style={{
+                    transform: [
+                      {
+                        rotateZ: lockOpenRotation.interpolate({
+                          inputRange: [0, 180],
+                          outputRange: ["0deg", "180deg"],
+                        }),
+                      },
+                    ],
+                    opacity: lockOpenOpacity,
+                  }}
+                >
+                  <Ionicons
+                    name={`lock-closed-outline`}
+                    color="#ffcc33"
+                    size={24}
+                  />
+                </Animated.View>
+                <Switch
+                  trackColor={{ false: "#767577", true: "#0099e6" }}
+                  thumbColor={!isPrivateSearch ? "#204060" : "#a8abb3"}
+                  onValueChange={() => setIsPrivateSearch((prev) => !prev)}
+                  value={!isPrivateSearch}
+                />
+                <Animated.View
+                  style={{
+                    transform: [
+                      {
+                        rotateZ: lockClosedRotation.interpolate({
+                          inputRange: [-180, 0],
+                          outputRange: ["-180deg", "0deg"],
+                        }),
+                      },
+                    ],
+                    opacity: lockClosedOpacity,
+                  }}
+                >
+                  <Ionicons
+                    name={`lock-open-outline`}
+                    color="#ffcc33"
+                    size={24}
+                  />
+                </Animated.View>
+              </View>
+            </View>
 
-            <TouchableOpacity
-              className="bg-background h-10 rounded-s my-6 justify-center flex-row items-center gap-3"
-              activeOpacity={0.8}
-              disabled={isDisabled}
-              style={{ opacity: isDisabled ? 0.3 : 1 }}
-              onPress={handleJoinBattle}
-            >
-              <Text className="text-center font-mono-bold text-xl">
-                {!isJoining ? "JOIN" : "JOINING..."}
-                {isJoining && <ActivityIndicator />}
-              </Text>
-            </TouchableOpacity>
+            {isPrivateSearch && (
+              <>
+                <PrivateRoom roomCode={roomCode} setRoomCode={setRoomCode} />
+                <TouchableOpacity
+                  className="bg-background h-10 rounded-s my-6 justify-center flex-row items-center gap-3"
+                  activeOpacity={0.8}
+                  disabled={isDisabled}
+                  style={{ opacity: isDisabled ? 0.3 : 1 }}
+                  onPress={() => handleJoinBattle(roomCode)}
+                >
+                  <Text className="text-center font-mono-bold text-xl">
+                    {!isJoining ? "JOIN" : "JOINING..."}
+                    {isJoining && <ActivityIndicator />}
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
+
+            {!isPrivateSearch && (
+              <PublicRooms onJoinBattle={handleJoinBattle} onError={errorFn} />
+            )}
           </View>
         </View>
-
-        {/*<PublicRooms containerClass="mt-10 px-10" />*/}
       </View>
       {shouldDisplayAds && (
         <BannerAd
