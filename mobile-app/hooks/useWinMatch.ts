@@ -19,7 +19,7 @@ const useWinMatch = () => {
     message: "",
     onConfirm: () => {},
   });
-  const { match, playerId } = useGame();
+  const { match, playerId, supabase } = useGame();
   const { navigate } = useNavigation<NavigationProp<ParamListBase>>();
 
   const adUnitId = useMemo(
@@ -65,14 +65,29 @@ const useWinMatch = () => {
     };
   }, []);
 
-  const onConfirm = useCallback(() => {
+  const cleanupMatchData = useCallback(async () => {
+    if (!match?.id || !supabase) return;
+    try {
+      await supabase.rpc("rpc_cleanup_finished_match", {
+        p_match_id: match.id,
+      });
+    } catch (error) {
+      console.error("Error cleaning up finished match:", error);
+      // Continue navigation even if cleanup fails
+    }
+  }, [match?.id, supabase]);
+
+  const onConfirm = useCallback(async () => {
+    // Cleanup match data before navigating
+    await cleanupMatchData();
+
     // Show ad if loaded, otherwise navigate immediately
     if (adLoaded) {
       interstitial.show();
     } else {
       navigate("index");
     }
-  }, [adLoaded, interstitial, navigate]);
+  }, [adLoaded, interstitial, navigate, cleanupMatchData]);
 
   useEffect(() => {
     if (match?.status !== MatchStatus.FINISHED) return;

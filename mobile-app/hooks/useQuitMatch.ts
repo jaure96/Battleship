@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { BackHandler } from "react-native";
 
 const useQuitMatch = () => {
-  const { match, cancelMatch } = useGame();
+  const { match, cancelMatch, supabase } = useGame();
   const [msg, setMsg] = useState({
     title: "",
     subTitle: "",
@@ -22,11 +22,23 @@ const useQuitMatch = () => {
     setMsg((prev) => ({ ...prev, visible: false }));
   };
 
+  const cleanupCancelledMatch = async (matchId: string) => {
+    if (!supabase) return;
+    try {
+      // The rpc_cancel_match function now handles the cleanup
+      await cancelMatch(matchId);
+    } catch (error) {
+      console.error("Error cancelling match:", error);
+    }
+  };
+
   const onCancel = async () => {
     closeDialog();
   };
-  const onConfirm = (withCancel = true) => {
-    if (match && withCancel) cancelMatch(match.id);
+  const onConfirm = async (withCancel = true) => {
+    if (match && withCancel) {
+      await cleanupCancelledMatch(match.id);
+    }
     closeDialog();
     navigate("index");
   };

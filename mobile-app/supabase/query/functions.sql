@@ -323,6 +323,44 @@ begin
     raise exception using message = 'Match not found';
   end if;
 
+  -- Delete all moves associated with this match
+  delete from public.moves where match_id = p_match_id;
+
+  -- Delete all match players associated with this match
+  delete from public.match_players where match_id = p_match_id;
+
+  return m;
+end;
+$$;
+
+
+-- 6) rpc_cleanup_finished_match: elimina datos de una partida terminada
+create or replace function public.rpc_cleanup_finished_match(
+  p_match_id uuid
+)
+returns public.matches
+security definer
+language plpgsql
+as $$
+declare
+  m public.matches%rowtype;
+begin
+  -- Validate match exists and is finished
+  select * into m from public.matches where id = p_match_id;
+  if not found then
+    raise exception using message = 'Match not found';
+  end if;
+
+  if m.status != 'finished' then
+    raise exception using message = 'Match is not finished';
+  end if;
+
+  -- Delete all moves associated with this match
+  delete from public.moves where match_id = p_match_id;
+
+  -- Delete all match players associated with this match
+  delete from public.match_players where match_id = p_match_id;
+
   return m;
 end;
 $$;
