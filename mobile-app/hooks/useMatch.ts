@@ -18,7 +18,6 @@ export const useMatch = (
   const matchId = useMemo(() => match?.id, [match?.id]);
   useEffect(() => {
     if (!matchId || !supabase) return;
-    console.log("ENTERED!!");
 
     const matchChannel = supabase
       .channel(`public:matches:id=eq.${matchId}`)
