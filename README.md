@@ -221,6 +221,16 @@ The mobile app uses Supabase with the following main tables:
 
 See `mobile-app/supabase/query/` for detailed SQL schemas and RLS policies.
 
+### Match Data Cleanup
+
+When a match is cancelled or finished, the associated player and move data is automatically cleaned up:
+
+- **Cancelled Matches**: When a match is cancelled, all `match_players` and `moves` records are deleted via the `rpc_cancel_match` function
+- **Finished Matches**: When a match is finished, all `match_players` and `moves` records are deleted via the `rpc_cleanup_finished_match` function called from `useWinMatch` hook
+- **Automatic Cleanup**: Cleanup occurs automatically when players confirm the match end dialog
+
+This ensures the database stays clean and prevents accumulation of orphaned match data.
+
 ## Development Guidelines
 
 ### Code Style
