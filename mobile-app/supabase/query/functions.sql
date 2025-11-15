@@ -182,8 +182,8 @@ begin
     raise exception using message = 'Opponent missing';
   end if;
 
-  -- check if this cell has already been shot
-  if exists (select 1 from public.moves where match_id = p_match_id and x = p_x and y = p_y) then
+  -- check if this cell has already been shot by this player
+  if exists (select 1 from public.moves where match_id = p_match_id and by_player_id = p_by_player_id and x = p_x and y = p_y) then
     raise exception using message = 'Cell already shot';
   end if;
 
