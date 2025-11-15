@@ -24,12 +24,12 @@ const CreateBattle = () => {
   const { shouldDisplayAds } = useAdMob();
   const { goBack, navigate } = useNavigation();
   const { top, bottom } = useSafeAreaInsets();
-  useGame();
+
   const [battleName, setBattleName] = useState("");
   const [isPublic, setIsPublic] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
-  const { setMatch, createMatch } = useGame();
+  const { createMatch } = useGame();
 
   const adUnitId = useMemo(
     () =>
@@ -42,10 +42,9 @@ const CreateBattle = () => {
   const handleCreateBattle = useCallback(async () => {
     try {
       setIsCreating(true);
-      const { data, error } = await createMatch(battleName, !isPublic);
+      const { error, data } = await createMatch(battleName, !isPublic);
       if (error) throw new Error(error.message);
       if (!error && data) {
-        setMatch(data);
         setIsCreating(false);
         //@ts-ignore
         navigate("battle");
@@ -53,7 +52,7 @@ const CreateBattle = () => {
     } catch (error) {
       setIsCreating(false);
     }
-  }, [battleName, isPublic, createMatch, navigate, setMatch]);
+  }, [battleName, isPublic, createMatch, navigate]);
 
   const isDisabled = useMemo(
     () => battleName.length === 0 || isCreating,

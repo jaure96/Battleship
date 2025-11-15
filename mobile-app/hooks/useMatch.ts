@@ -18,29 +18,7 @@ export const useMatch = (
   const matchId = useMemo(() => match?.id, [match?.id]);
   useEffect(() => {
     if (!matchId || !supabase) return;
-    let mounted = true;
-
-    (async () => {
-      try {
-        const [{ data: m }, { data: pls }, { data: ms }] = await Promise.all([
-          supabase.from("matches").select("*").eq("id", matchId).single(),
-          supabase.from("match_players").select("*").eq("match_id", matchId),
-          supabase
-            .from("moves")
-            .select("*")
-            .eq("match_id", matchId)
-            .order("move_number", { ascending: true }),
-        ]);
-
-        if (!mounted) return;
-
-        setMatch(m);
-        setPlayers(pls ?? []);
-        setMoves(ms ?? []);
-      } catch (error) {
-        console.error("Error loading match data:", error);
-      }
-    })();
+    console.log("ENTERED!!");
 
     const matchChannel = supabase
       .channel(`public:matches:id=eq.${matchId}`)
@@ -53,11 +31,9 @@ export const useMatch = (
           filter: `id=eq.${matchId}`,
         },
         (payload) => {
-          setMatch((currentMatch: Match | null) => {
-            if (payload.eventType === "DELETE") {
-              return null;
-            }
-            return (payload.new as Match) || currentMatch;
+          setMatch(() => {
+            if (payload.eventType === "DELETE") return null;
+            return payload.new as Match;
           });
         }
       )
@@ -78,7 +54,7 @@ export const useMatch = (
             .from("match_players")
             .select("*")
             .eq("match_id", matchId);
-          if (mounted) setPlayers(pls ?? []);
+          setPlayers(pls ?? []);
         }
       )
       .subscribe();
@@ -94,7 +70,7 @@ export const useMatch = (
           filter: `match_id=eq.${matchId}`,
         },
         (payload) => {
-          if (mounted) setMoves((prev) => [...prev, payload.new] as Move[]);
+          setMoves((prev) => [...prev, payload.new] as Move[]);
         }
       )
       .subscribe();
@@ -106,7 +82,6 @@ export const useMatch = (
     };
 
     return () => {
-      mounted = false;
       Object.values(channelRefs.current).forEach((channel) => {
         if (channel) supabase.removeChannel(channel);
       });
@@ -120,12 +95,15 @@ export const useMatch = (
     displayName?: string
   ): Promise<{ data: Match | null; error: any }> => {
     if (!supabase || !playerId) throw new Error("No supabase or playerId");
-    return supabase.rpc("rpc_create_match", {
+    const result = await (supabase.rpc("rpc_create_match", {
       p_name: name,
       p_is_private: isPrivate,
       p_host_player_id: playerId,
       p_display_name: displayName ?? null,
-    }) as unknown as Promise<{ data: Match | null; error: any }>;
+    }) as unknown as Promise<{ data: Match | null; error: any }>);
+
+    if (result.data) setMatch(result.data);
+    return result;
   };
 
   const joinMatchByCode = async (
@@ -133,11 +111,14 @@ export const useMatch = (
     display_name?: string
   ): Promise<{ data: Match | null; error: any }> => {
     if (!supabase || !playerId) throw new Error("No supabase or playerId");
-    return supabase.rpc("rpc_join_match_by_code", {
+    const result = await supabase.rpc("rpc_join_match_by_code", {
       p_code: code,
       p_player_id: playerId,
       p_display_name: display_name ?? null,
     });
+
+    if (result.data) setMatch(result.data as Match);
+    return result;
   };
 
   const setShipsAndReady = async (
@@ -175,19 +156,16 @@ export const useMatch = (
     });
   };
 
-  const matchEngineReturn = {
+  return {
     players,
     moves,
     match,
-    setMatch,
     createMatch,
     joinMatchByCode,
     setShipsAndReady,
     makeMove,
     cancelMatch,
   };
-
-  return matchEngineReturn;
 };
 
 export type UseMatchReturn = ReturnType<typeof useMatch>;

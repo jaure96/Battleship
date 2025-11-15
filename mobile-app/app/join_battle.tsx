@@ -98,7 +98,7 @@ const JoinBattle = () => {
     lockClosedOpacity,
   ]);
 
-  const { setMatch, joinMatchByCode } = useGame();
+  const { joinMatchByCode } = useGame();
   const { toast, setToast, error: errorFn } = useToast();
 
   const isDisabled = useMemo(
@@ -127,7 +127,6 @@ const JoinBattle = () => {
         }
 
         if (!error && data) {
-          setMatch(data);
           //@ts-ignore
           navigate("battle");
           setIsJoining(false);
@@ -137,7 +136,7 @@ const JoinBattle = () => {
         setIsJoining(false);
       }
     },
-    [joinMatchByCode, navigate, setMatch, errorFn]
+    [joinMatchByCode, navigate, errorFn]
   );
 
   return (
