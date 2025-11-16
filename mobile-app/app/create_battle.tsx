@@ -29,7 +29,7 @@ const CreateBattle = () => {
   const [isPublic, setIsPublic] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
-  const { createMatch } = useGame();
+  const { createMatch, isAuthReady } = useGame();
 
   const adUnitId = useMemo(
     () =>
@@ -49,14 +49,14 @@ const CreateBattle = () => {
         //@ts-ignore
         navigate("battle");
       }
-    } catch (error) {
+    } catch {
       setIsCreating(false);
     }
   }, [battleName, isPublic, createMatch, navigate]);
 
   const isDisabled = useMemo(
-    () => battleName.length === 0 || isCreating,
-    [isCreating, battleName]
+    () => battleName.length === 0 || isCreating || !isAuthReady,
+    [isCreating, battleName, isAuthReady]
   );
 
   return (

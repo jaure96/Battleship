@@ -16,6 +16,18 @@ export const useMatch = (
   const channelRefs = useRef<{ match?: any; players?: any; moves?: any }>({});
 
   const matchId = useMemo(() => match?.id, [match?.id]);
+
+  // Effect to clean up subscriptions when supabase client changes
+  useEffect(() => {
+    return () => {
+      Object.values(channelRefs.current).forEach((channel) => {
+        if (channel) supabase?.removeChannel(channel);
+      });
+      channelRefs.current = {};
+    };
+  }, [supabase]);
+
+  // Effect to subscribe to match changes
   useEffect(() => {
     if (!matchId || !supabase) return;
 
@@ -86,7 +98,7 @@ export const useMatch = (
       });
       channelRefs.current = {};
     };
-  }, [matchId, supabase, setMatch]);
+  }, [matchId, supabase]);
 
   const createMatch = async (
     name: string,

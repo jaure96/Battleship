@@ -131,7 +131,7 @@ const JoinBattle = () => {
           navigate("battle");
           setIsJoining(false);
         }
-      } catch (e) {
+      } catch {
         errorFn("Error joining battle. Try again.", 3_000);
         setIsJoining(false);
       }

@@ -24,6 +24,7 @@ interface Player {
 interface GameContextValue extends UseMatchReturn {
   supabase: SupabaseClient;
   playerId: string | null;
+  isAuthReady: boolean;
 }
 
 const GameContext = createContext<GameContextValue | undefined>(undefined);
@@ -33,6 +34,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [player, setPlayer] = useState<Player | null>(null);
   const [authedClient, setAuthedClient] = useState<SupabaseClient>(baseClient);
+  const [isAuthReady, setIsAuthReady] = useState(false);
 
   const matchEngine = useMatch(authedClient, player?.id);
 
@@ -59,6 +61,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           },
         });
         setAuthedClient(authed);
+        setIsAuthReady(true);
       } else {
         try {
           const { data: signInData, error: signInError } =
@@ -100,6 +103,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
             },
           });
           setAuthedClient(authed);
+          setIsAuthReady(true);
         } catch (err) {
           console.error(
             "❌ GameContext: initAuth - Error creating anonymous guest:",
@@ -108,6 +112,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           await AsyncStorage.removeItem("player");
           setPlayer(null);
           setAuthedClient(baseClient);
+          setIsAuthReady(false);
         }
       }
     };
@@ -135,10 +140,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
             },
           });
           setAuthedClient(authed);
+          setIsAuthReady(true);
         } else {
           await AsyncStorage.removeItem("player");
           setPlayer(null);
           setAuthedClient(baseClient);
+          setIsAuthReady(false);
         }
       }
     );
@@ -151,6 +158,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   const value: GameContextValue = {
     supabase: authedClient,
     playerId: player?.id ?? null,
+    isAuthReady,
     ...matchEngine,
   };
 
