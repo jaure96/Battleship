@@ -23,6 +23,7 @@ const IMAGES_PATH = [
   "screen5.png",
   "screen6.png",
   "screen7.png",
+  "screen8.png",
 ];
 
 const Home = () => {
