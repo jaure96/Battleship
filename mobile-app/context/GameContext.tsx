@@ -6,7 +6,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
 
-const baseClient = createClient(supabaseUrl, supabaseAnonKey, {
+const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     storage: AsyncStorage,
     autoRefreshToken: true,
@@ -14,12 +14,6 @@ const baseClient = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: false,
   },
 });
-
-interface Player {
-  id: string;
-  username: string;
-  token: string;
-}
 
 interface GameContextValue extends UseMatchReturn {
   supabase: SupabaseClient;
@@ -32,132 +26,73 @@ const GameContext = createContext<GameContextValue | undefined>(undefined);
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [player, setPlayer] = useState<Player | null>(null);
-  const [authedClient, setAuthedClient] = useState<SupabaseClient>(baseClient);
+  const [playerId, setPlayerId] = useState<string | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
 
-  const matchEngine = useMatch(authedClient, player?.id);
+  const matchEngine = useMatch(supabaseClient, playerId ?? undefined);
 
   useEffect(() => {
+    // Initialize authentication
     const initAuth = async () => {
-      const { data } = await baseClient.auth.getSession();
+      try {
+        const { data } = await supabaseClient.auth.getSession();
 
-      if (data.session) {
-        const { user, access_token } = data.session;
-        const newPlayer = {
-          id: user.id,
-          username: user.user_metadata.username || "Guest",
-          token: access_token,
-        };
-        await AsyncStorage.setItem("player", JSON.stringify(newPlayer));
-        setPlayer(newPlayer);
-        const authed = createClient(supabaseUrl, supabaseAnonKey, {
-          global: { headers: { Authorization: `Bearer ${access_token}` } },
-          auth: {
-            storage: AsyncStorage,
-            autoRefreshToken: true,
-            persistSession: true,
-            detectSessionInUrl: false,
-          },
-        });
-        setAuthedClient(authed);
-        setIsAuthReady(true);
-      } else {
-        try {
-          const { data: signInData, error: signInError } =
-            await baseClient.auth.signInAnonymously();
+        if (data.session?.user) {
+          // User already logged in
+          setPlayerId(data.session.user.id);
+          setIsAuthReady(true);
+        } else {
+          // Create anonymous session
+          const { data: signInData, error } =
+            await supabaseClient.auth.signInAnonymously();
 
-          if (signInError) throw signInError;
-          if (!signInData.session || !signInData.user)
-            throw new Error(
-              "No session or user returned after anonymous sign-in."
-            );
+          if (error) throw error;
 
-          const { user, session } = signInData;
-          const newPlayer = {
-            id: user.id,
-            username:
-              user.user_metadata.username ||
-              `Guest-${Math.floor(Math.random() * 1000)}`,
-            token: session.access_token,
-          };
+          const userId = signInData.user?.id;
+          if (!userId) throw new Error("No user ID returned");
 
-          // Update user metadata with a default username if not already set
-          if (!user.user_metadata.username) {
-            await baseClient.auth.updateUser({
-              data: { username: newPlayer.username },
+          // Update metadata with generated username if not already set
+          if (!signInData.user?.user_metadata?.username) {
+            await supabaseClient.auth.updateUser({
+              data: { username: `Guest-${Math.floor(Math.random() * 1000)}` },
             });
           }
 
-          await AsyncStorage.setItem("player", JSON.stringify(newPlayer));
-          setPlayer(newPlayer);
-          const authed = createClient(supabaseUrl, supabaseAnonKey, {
-            global: {
-              headers: { Authorization: `Bearer ${session.access_token}` },
-            },
-            auth: {
-              storage: AsyncStorage,
-              autoRefreshToken: true,
-              persistSession: true,
-              detectSessionInUrl: false,
-            },
-          });
-          setAuthedClient(authed);
+          setPlayerId(userId);
           setIsAuthReady(true);
-        } catch (err) {
-          console.error(
-            "❌ GameContext: initAuth - Error creating anonymous guest:",
-            err
-          );
-          await AsyncStorage.removeItem("player");
-          setPlayer(null);
-          setAuthedClient(baseClient);
-          setIsAuthReady(false);
         }
+      } catch (err) {
+        console.error(
+          "❌ GameContext: Failed to initialize authentication:",
+          err
+        );
+        setIsAuthReady(false);
       }
     };
 
     initAuth();
 
-    const { data: authListener } = baseClient.auth.onAuthStateChange(
-      async (event, session) => {
-        if (session) {
-          const { user, access_token } = session;
-          const newPlayer = {
-            id: user.id,
-            username: user.user_metadata.username || "Guest",
-            token: access_token,
-          };
-          await AsyncStorage.setItem("player", JSON.stringify(newPlayer));
-          setPlayer(newPlayer);
-          const authed = createClient(supabaseUrl, supabaseAnonKey, {
-            global: { headers: { Authorization: `Bearer ${access_token}` } },
-            auth: {
-              storage: AsyncStorage,
-              autoRefreshToken: true,
-              persistSession: true,
-              detectSessionInUrl: false,
-            },
-          });
-          setAuthedClient(authed);
+    // Listen for auth state changes
+    const { data: authListener } = supabaseClient.auth.onAuthStateChange(
+      (event, session) => {
+        if (session?.user) {
+          setPlayerId(session.user.id);
           setIsAuthReady(true);
         } else {
-          await AsyncStorage.removeItem("player");
-          setPlayer(null);
-          setAuthedClient(baseClient);
+          setPlayerId(null);
           setIsAuthReady(false);
         }
       }
     );
 
     return () => {
-      authListener.subscription.unsubscribe();
+      authListener?.subscription.unsubscribe();
     };
   }, []);
 
   const value: GameContextValue = {
-    supabase: authedClient,
-    playerId: player?.id ?? null,
+    supabase: supabaseClient,
+    playerId,
     isAuthReady,
     ...matchEngine,
   };
