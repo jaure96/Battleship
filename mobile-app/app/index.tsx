@@ -1,9 +1,11 @@
 import GameHeader from "@/components/GameHeader";
 import useAdMob from "@/hooks/useAdMob";
+import { useStoreRating } from "@/hooks/useStoreRating";
+
 import { FontAwesome6, MaterialCommunityIcons } from "@expo/vector-icons";
 import { NavigationProp, ParamListBase } from "@react-navigation/native";
 import { useNavigation } from "expo-router";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import {
   BannerAd,
@@ -16,6 +18,7 @@ export const Lobby = () => {
   const { navigate } = useNavigation<NavigationProp<ParamListBase>>();
   const { bottom } = useSafeAreaInsets();
   const { shouldDisplayAds } = useAdMob();
+  const { requestReview } = useStoreRating();
 
   const adUnitId = useMemo(
     () =>
@@ -24,6 +27,10 @@ export const Lobby = () => {
         : "ca-app-pub-2357304452833824/5553306083",
     []
   );
+
+  useEffect(() => {
+    requestReview();
+  }, []);
 
   return (
     <View className="flex-1 justify-center items-center bg-background px-6 ">
