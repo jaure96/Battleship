@@ -11,7 +11,7 @@ const PrivacyPolicy = () => {
             <Link to="/" className="flex items-center space-x-3">
               <Ship className="w-8 h-8 text-[#FFC107]" />
               <span className="text-2xl font-bold text-white tracking-tight">
-                Battleship
+                NavalClash
               </span>
             </Link>
             <Link
@@ -40,7 +40,7 @@ const PrivacyPolicy = () => {
                 1. Introduction
               </h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                Welcome to Battleship. We are committed to protecting your
+                Welcome to NavalClash. We are committed to protecting your
                 privacy and ensuring you have a positive experience. This
                 Privacy Policy explains how we collect, use, disclose, and
                 safeguard your information when using our mobile application,
@@ -163,7 +163,7 @@ const PrivacyPolicy = () => {
       <footer className="bg-[#0D1B2A] border-t border-[#0AA2DD]/20 py-8 px-4">
         <div className="max-w-7xl mx-auto text-center">
           <p className="text-white/60 text-sm">
-            &copy; 2025 Battleship. All rights reserved.
+            &copy; 2026 NavalClash. All rights reserved.
           </p>
         </div>
       </footer>

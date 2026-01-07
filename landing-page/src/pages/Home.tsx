@@ -38,11 +38,11 @@ const Home = () => {
             <Link to="/" className="flex items-center space-x-3">
               <img
                 src="/icon.png"
-                alt="Battleship Logo"
+                alt="NavalClash Logo"
                 className="w-10 h-10"
               />
               <span className="text-2xl font-bold text-white tracking-tight">
-                Battleship
+                NavalClash
               </span>
             </Link>
 
@@ -133,7 +133,7 @@ const Home = () => {
           />
 
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
-            Battleship
+            NavalClash
           </h1>
 
           <p className="text-2xl md:text-3xl text-white/90 mb-4">
@@ -319,9 +319,9 @@ const Home = () => {
       {/* Footer */}
       <footer className="bg-[#0D1B2A] border-t border-[#0AA2DD]/20 py-8 px-4 text-center">
         <Ship className="w-6 h-6 text-[#FFC107] mx-auto mb-2" />
-        <span className="text-white font-bold">Battleship</span>
+        <span className="text-white font-bold">NavalClash</span>
         <p className="text-white/60 text-sm mt-3">
-          &copy; 2025 Battleship. All rights reserved.
+          &copy; 2026 NavalClash. All rights reserved.
         </p>
       </footer>
     </div>
